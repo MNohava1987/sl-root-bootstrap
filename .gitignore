@@ -1,0 +1,21 @@
+# Terraform local artifacts
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Secrets and local overrides
+*.tfvars
+*.tfvars.json
+.env
+.env.*
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

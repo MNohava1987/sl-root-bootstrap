@@ -1,4 +1,4 @@
-package spacelift.env
+package spacelift
 import rego.v1
 
 # Test: Approval required for Tier 1 Orchestrator

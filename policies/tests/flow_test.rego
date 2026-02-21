@@ -1,4 +1,4 @@
-package spacelift.env
+package spacelift
 import rego.v1
 
 # Test: Management stack MUST use main for Tracked Run

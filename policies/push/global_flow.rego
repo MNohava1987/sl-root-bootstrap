@@ -1,4 +1,4 @@
-package spacelift.env
+package spacelift
 import rego.v1
 
 # --- ENVIRONMENT GIT FLOW POLICY ---

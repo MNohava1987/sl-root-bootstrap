@@ -93,7 +93,7 @@ resource "spacelift_space" "env_sub_space" {
 
 resource "spacelift_stack" "admin_stacks" {
   for_each    = local.envs
-  name        = "admin-stacks-orchestrator"
+  name        = "${lower(each.key)}-admin-stacks-orchestrator"
   description = "Orchestrator for the ${each.key} management plane"
   space_id    = spacelift_space.env_sub_space["${each.key}.admin"].id
 

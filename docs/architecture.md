@@ -52,7 +52,7 @@ flowchart TD
       EnvRoot[Top-level environment space\ninherit_entities=false]
       EnvPolicies[Environment policies\nGIT_PUSH PLAN APPROVAL]
       SubSpaces[Subspaces from bootstrap_spaces\nfor example admin]
-      Orch[Tier-1 orchestrator stack\nadmin-stacks-orchestrator]
+      Orch[Tier-1 orchestrator stack\n${environment}-admin-stacks-orchestrator]
       RoleAttach[Space Admin role attachment\nscoped to environment root]
     end
 
@@ -109,6 +109,6 @@ flowchart LR
 | Tier | Name | Responsibility | Identity |
 | :--- | :--- | :--- | :--- |
 | **Tier 0** | Foundation | Establish root of trust and bootstrap identity | `sl-root-bootstrap` |
-| **Tier 1** | Orchestrator | Manage environment hierarchy and local governance | `admin-stacks-orchestrator` |
+| **Tier 1** | Orchestrator | Manage environment hierarchy and local governance | `${environment}-admin-stacks-orchestrator` |
 | **Tier 2** | Critical Workload | Mission-critical infrastructure | production/live workloads |
 | **Tier 3+** | Standard Workload | General application resources | dev/test workloads |
