@@ -9,6 +9,12 @@ resource "spacelift_policy" "global_push_flow" {
   space_id    = "root"
 }
 
+# Explicit attachment to the Root Space ensures global inheritance.
+resource "spacelift_policy_attachment" "global_push_root" {
+  policy_id = spacelift_policy.global_push_flow.id
+  space_id  = "root"
+}
+
 # Environment Guard: Ensures branch names match stack environment labels.
 resource "spacelift_policy" "branch_env" {
   name        = "branch-env-guard"
@@ -18,6 +24,12 @@ resource "spacelift_policy" "branch_env" {
   space_id    = "root"
 }
 
+# Explicit attachment to the Root Space ensures global inheritance.
+resource "spacelift_policy_attachment" "branch_env_root" {
+  policy_id = spacelift_policy.branch_env.id
+  space_id  = "root"
+}
+
 # --- 2) ADMIN CONTROL PLANE ---
 
 # Admin space (The isolated management folder)
@@ -25,6 +37,7 @@ resource "spacelift_space" "admin" {
   parent_space_id = var.admin_space_id
   name            = "Admin"
   description     = "Admin control plane space"
+  inherit_entities = true
 }
 
 # Admin-stacks stack (The Orchestrator)
