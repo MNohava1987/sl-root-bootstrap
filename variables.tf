@@ -15,7 +15,7 @@ variable "vcs_integration_id" {
 
 variable "admin_space_id" {
   type        = string
-  default     = "admin"
+  default     = "root"
   description = "Stable ID for the admin space"
 }
 
