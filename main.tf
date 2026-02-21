@@ -1,13 +1,13 @@
 locals {
   env_data = yamldecode(file("${path.module}/manifests/management-plane.yaml"))
-  
+
   # Dual-safety: handles missing keys (via try) AND explicit nulls (via conditional)
   envs_list = try(local.env_data.environments, [])
-  envs      = { for e in (local.envs_list == null ? [] : local.envs_list) : e.name => e }
-  
+  envs      = { for e in(local.envs_list == null ? [] : local.envs_list) : e.name => e }
+
   # Templates for sub-structure inside every environment (from YAML)
   boot_list           = try(local.env_data.bootstrap_spaces, [])
-  bootstrap_templates = { for s in (local.boot_list == null ? [] : local.boot_list) : s.name => s }
+  bootstrap_templates = { for s in(local.boot_list == null ? [] : local.boot_list) : s.name => s }
 
   # Flattened matrix: Environment x Bootstrap Space
   env_sub_spaces = merge([
@@ -63,13 +63,13 @@ resource "spacelift_policy" "env_approval" {
 
 # Top-level Environment Container
 resource "spacelift_space" "env_root" {
-  for_each         = local.envs
-  name             = each.key
-  description      = each.value.description
-  parent_space_id  = "root"
-  
+  for_each        = local.envs
+  name            = each.key
+  description     = each.value.description
+  parent_space_id = "root"
+
   # HIGH ASSURANCE BOUNDARY: Turn off inheritance from root to prevent policy leakage.
-  inherit_entities = false 
+  inherit_entities = false
 
   labels = [
     "environment:${lower(each.key)}",
@@ -80,13 +80,13 @@ resource "spacelift_space" "env_root" {
 
 # Sub-spaces inside each environment (e.g. Live/admin)
 resource "spacelift_space" "env_sub_space" {
-  for_each         = local.env_sub_spaces
-  name             = each.value.sub_name
-  description      = each.value.description
-  parent_space_id  = spacelift_space.env_root[each.value.env_name].id
-  
+  for_each        = local.env_sub_spaces
+  name            = each.value.sub_name
+  description     = each.value.description
+  parent_space_id = spacelift_space.env_root[each.value.env_name].id
+
   # INTERNAL INHERITANCE: Sub-spaces inherit from their parent environment root.
-  inherit_entities = true 
+  inherit_entities = true
 }
 
 # --- 3) ORCHESTRATION ---
@@ -101,8 +101,8 @@ resource "spacelift_stack" "admin_stacks" {
   branch       = var.admin_stacks_branch
   project_root = "/"
 
-  autodeploy           = var.enable_auto_deploy
-  enable_local_preview = true
+  autodeploy            = var.enable_auto_deploy
+  enable_local_preview  = true
   protect_from_deletion = var.enable_deletion_protection
 
   labels = [
@@ -121,22 +121,4 @@ resource "spacelift_role_attachment" "admin_stacks" {
   stack_id = spacelift_stack.admin_stacks[each.key].id
   role_id  = data.spacelift_role.space_admin.id
   space_id = spacelift_space.env_root[each.key].id
-}
-
-# --- 4) HIGH ASSURANCE VALIDATION (CHECK BLOCKS) ---
-
-# Verifies the Hard Boundary is maintained for all environments
-check "environment_isolation" {
-  assert {
-    condition     = alltrue([for s in spacelift_space.env_root : s.inherit_entities == false])
-    error_message = "Environment root spaces MUST have inherit_entities set to false for hard isolation."
-  }
-}
-
-# Verifies that all Orchestrators are correctly categorized
-check "orchestrator_governance" {
-  assert {
-    condition     = alltrue([for s in spacelift_stack.admin_stacks : contains(s.labels, "assurance:tier-1")])
-    error_message = "All orchestrator stacks MUST carry the 'assurance:tier-1' functional label."
-  }
 }

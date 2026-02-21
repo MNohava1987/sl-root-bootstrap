@@ -1,3 +1,5 @@
+manifest_version: 1
+
 # --- TEMPLATED ENVIRONMENTS ---
 # These environments receive the full High-Assurance treatment:
 # (Container -> Admin Space -> Orchestrator Stack -> Global Policies)

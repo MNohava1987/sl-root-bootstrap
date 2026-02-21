@@ -8,6 +8,25 @@ All notable changes to the Spacelift Root Bootstrap project will be documented i
 - **Automated Policy Enforcement (Git/Spacelift Hooks)**: Implement automated `opa test` execution at the commit level (Git Pre-Commit Hooks) and planning level (Spacelift Pre-Plan Hooks).
     - **Future Resolution Strategy**: Update `.spacelift/config.yml` to download the OPA binary and execute recursive unit tests as a mandatory quality gate before every Terraform plan.
 
+## [1.1.1] - 2026-02-21
+### Added
+- Dedicated `checks.tf` for centralized contract and assurance `check` blocks.
+- Manifest schema contract gate requiring `manifest_version`.
+- Tunable governance variables for contract enforcement:
+  - `manifest_supported_versions`
+  - `allowed_assurance_tiers`
+  - `required_bootstrap_space_names`
+  - `enforce_lowercase_environment_names`
+- Portable assurance scripts:
+  - `scripts/validate-contract.sh`
+  - `scripts/test-policies.sh`
+  - `scripts/assurance-gate.sh`
+- Assurance gate documentation in `docs/assurance-gates.md`.
+
+### Changed
+- Spacelift hook pipeline (`.spacelift/config.yml`) now executes repository assurance gates before plan.
+- Manifest now declares explicit `manifest_version: 1`.
+
 ## [1.1.0] - 2026-02-21
 ### Added
 - High-Assurance "Cellular" Architecture: Each environment (Live, Test) is now an isolated unit with its own local governance and spaces.

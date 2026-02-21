@@ -3,3 +3,5 @@ stack:
     - terraform fmt -check
   before_plan:
     - terraform validate
+    - chmod +x scripts/validate-contract.sh scripts/test-policies.sh scripts/assurance-gate.sh
+    - scripts/assurance-gate.sh
