@@ -18,9 +18,8 @@ resource "spacelift_policy" "branch_env" {
   space_id    = "root"
 }
 
-# --- 2) ADMIN CONTROL PLANE (COMMENTED OUT FOR RESET) ---
+# --- 2) ADMIN CONTROL PLANE ---
 
-/*
 # Admin space (The isolated management folder)
 resource "spacelift_space" "admin" {
   parent_space_id = var.admin_space_id
@@ -52,4 +51,3 @@ output "admin_space_id" {
 output "admin_stacks_stack_id" {
   value = spacelift_stack.admin_stacks.id
 }
-*/
