@@ -17,9 +17,16 @@ track if {
 }
 
 # 3. Proposed Runs (Previews)
+# This explicitly triggers plans for 'develop' and other non-main branches.
+propose if {
+    input.stack.labels["stack-type:management"]
+    input.push.branch == "develop"
+}
+
 propose if {
     input.stack.labels["stack-type:management"]
     input.push.branch != "main"
+    input.push.branch != "develop"
 }
 
 # 4. Automatic Housekeeping
