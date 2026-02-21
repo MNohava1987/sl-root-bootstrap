@@ -1,4 +1,4 @@
-package spacelift.seed
+package spacelift
 import rego.v1
 
 # Test: Approval REQUIRED for Tier 0 Bootstrap

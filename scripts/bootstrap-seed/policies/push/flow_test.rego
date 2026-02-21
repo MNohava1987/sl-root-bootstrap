@@ -1,4 +1,4 @@
-package spacelift.seed
+package spacelift
 import rego.v1
 
 # Test: Tier 0 MUST use main for Tracked Run
