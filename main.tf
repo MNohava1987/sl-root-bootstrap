@@ -2,93 +2,91 @@ locals {
   env_data = yamldecode(file("${path.module}/manifests/management-plane.yaml"))
   envs     = { for e in local.env_data.environments : e.name => e }
   
-  # Map standalone spaces for for_each
-  standalone = { for s in try(local.env_data.standalone_spaces, []) : s.name => s }
+  # Templates for sub-structure inside every environment (from YAML)
+  bootstrap_templates = { for s in try(local.env_data.bootstrap_spaces, []) : s.name => s }
+
+  # Flattened matrix: Environment x Bootstrap Space
+  # Format: "Live.admin", "Live.Security", etc.
+  env_sub_spaces = merge([
+    for env_name, env in local.envs : {
+      for sub_name, sub in local.bootstrap_templates : "${env_name}.${sub_name}" => {
+        env_name    = env_name
+        sub_name    = sub_name
+        description = sub.description
+      }
+    }
+  ]...)
 }
 
-# --- 1) CONSTITUTIONAL POLICIES ---
+# --- 1) CONSTITUTIONAL POLICIES (ENVIRONMENT-SPECIFIC) ---
 
-resource "spacelift_policy" "global_push_flow" {
-  name        = "global-git-flow"
+# Isolated Law per Container
+# These are local copies of the policies that live INSIDE the environment space.
+resource "spacelift_policy" "env_push_flow" {
+  for_each    = local.envs
+  name        = "git-flow"
   type        = "GIT_PUSH"
   body        = file("${path.module}/policies/push/global_flow.rego")
-  description = "Enforces main-only deployments for management stacks."
-  space_id    = "root"
+  description = "Enforces main-only deployments for management stacks in ${each.key}."
+  space_id    = spacelift_space.env_root[each.key].id
 }
 
-resource "spacelift_policy" "branch_env" {
+resource "spacelift_policy" "env_branch_guard" {
+  for_each    = local.envs
   name        = "branch-env-guard"
   type        = "PLAN"
   body        = file("${path.module}/policies/branch_env.rego")
-  description = "Blocks apply if branch name mismatch."
-  space_id    = "root"
+  description = "Blocks apply if branch name mismatch in ${each.key}."
+  space_id    = spacelift_space.env_root[each.key].id
 }
 
-resource "spacelift_policy" "global_approval" {
-  name        = "global-approval-law"
+resource "spacelift_policy" "env_approval" {
+  for_each    = local.envs
+  name        = "approval-law"
   type        = "APPROVAL"
   body        = file("${path.module}/policies/approval/global_approval.rego")
-  description = "Requires approval for Tier 0 and Tier 1 stacks."
-  space_id    = "root"
+  description = "Requires approval for management stacks in ${each.key}."
+  space_id    = spacelift_space.env_root[each.key].id
 }
 
-# --- 2) STANDALONE ROOT SPACES ---
+# --- 2) THE HIERARCHY CREATION ---
 
-resource "spacelift_space" "standalone" {
-  for_each        = local.standalone
-  name            = each.key
-  description     = each.value.description
-  parent_space_id = "root"
-  inherit_entities = true
-}
-
-# --- 3) THE "LIVE" HIERARCHY (TEMPLATED) ---
-
-# Create the top-level Environment Containers (e.g. Live)
+# The top-level Environment Container (e.g. Live)
 resource "spacelift_space" "env_root" {
   for_each        = local.envs
   name            = each.key
   description     = each.value.description
   parent_space_id = "root"
   inherit_entities = true
-
-  labels = ["environment:${lower(each.key)}"]
+  
+  labels = [
+    "environment:${lower(each.key)}",
+    "assurance:${each.value.assurance_tier}",
+    "governance:env-guard"
+  ]
 }
 
-# Attach Global Law to the Environment Layer
-resource "spacelift_policy_attachment" "global_flow" {
-  for_each  = spacelift_space.env_root
-  policy_id = spacelift_policy.global_push_flow.id
-  space_id  = each.value.id
-}
-
-resource "spacelift_policy_attachment" "branch_guard" {
-  for_each  = spacelift_space.env_root
-  policy_id = spacelift_policy.branch_env.id
-  space_id  = each.value.id
-}
-
-resource "spacelift_policy_attachment" "approval_guard" {
-  for_each  = spacelift_space.env_root
-  policy_id = spacelift_policy.global_approval.id
-  space_id  = each.value.id
-}
-
-# Create the Admin Space inside each Environment (Live/Admin)
-resource "spacelift_space" "admin" {
-  for_each        = spacelift_space.env_root
-  name            = "Admin"
-  parent_space_id = each.value.id
+# Sub-spaces within each environment (e.g. Live.admin, Live.Matt-Test)
+# These are driven entirely by the 'bootstrap_spaces' list in your manifest.
+resource "spacelift_space" "env_sub_space" {
+  for_each        = local.env_sub_spaces
+  name            = each.value.sub_name
+  description     = each.value.description
+  parent_space_id = spacelift_space.env_root[each.value.env_name].id
   inherit_entities = true
 }
 
-# --- 4) ENVIRONMENT-AWARE ORCHESTRATORS ---
+# --- 3) ORCHESTRATION ---
 
+# The Orchestrator Stack for each environment.
+# It is placed in the sub-space named "admin" (e.g. Live/admin).
 resource "spacelift_stack" "admin_stacks" {
-  for_each    = spacelift_space.admin
+  for_each    = local.envs
   name        = "admin-stacks"
   description = "Orchestrator for the ${each.key} management plane"
-  space_id    = each.value.id
+  
+  # Dynamically resolve the ID of the 'admin' sub-space for this environment
+  space_id    = spacelift_space.env_sub_space["${each.key}.admin"].id
 
   repository   = var.admin_stacks_repo
   branch       = var.admin_stacks_branch
@@ -98,29 +96,21 @@ resource "spacelift_stack" "admin_stacks" {
   administrative       = true
   enable_local_preview = true
 
+  # Functional Labels
   labels = [
     "stack-type:management",
     "assurance:tier-1",
-    "environment:${lower(each.key)}"
+    "environment:${lower(each.key)}",
+    "assurance:${each.value.assurance_tier}",
+    "governance:env-guard"
   ]
 }
 
-# --- 5) RELATIVE AWARENESS INJECTION ---
-
+# Relative Awareness Injection
 resource "spacelift_environment_variable" "orch_env_name" {
   for_each   = spacelift_stack.admin_stacks
   stack_id   = each.value.id
   name       = "TF_VAR_environment_name"
   value      = each.key 
   write_only = false
-}
-
-# --- 6) OUTPUTS ---
-
-output "management_plane_ids" {
-  value = { for k, v in spacelift_space.admin : k => v.id }
-}
-
-output "standalone_space_ids" {
-  value = { for k, v in spacelift_space.standalone : k => v.id }
 }

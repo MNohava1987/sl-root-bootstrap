@@ -8,28 +8,18 @@ governance_label := "governance:env-guard"
 deny[msg] if {
     input.stack.labels[governance_label] # Only trigger if label exists
     input.run.type == "APPLY"
-    env := input.stack.labels.environment
     branch := input.vcs.branch
-    not branch_matches_env(branch, env)
-    msg := sprintf("Apply blocked: branch %v does not match env %v", [branch, env])
+    not match(branch, input.stack.labels)
+    msg := sprintf("Apply blocked: branch %v does not match assurance tier for this stack", [branch])
 }
 
-branch_matches_env(branch, env) if {
-    env == "dev"
-    branch == "dev"
-}
-
-branch_matches_env(branch, env) if {
-    env == "test"
-    branch == "test"
-}
-
-branch_matches_env(branch, env) if {
-    env == "prod"
+# Helper to map branches to assurance tiers
+match(branch, labels) if {
+    labels["assurance:tier-2"]
     branch == "main"
 }
 
-branch_matches_env(branch, env) if {
-    env == "live"
-    branch == "main"
+match(branch, labels) if {
+    not labels["assurance:tier-2"]
+    branch == "test" # Allow non-tier-2 to use test branch
 }

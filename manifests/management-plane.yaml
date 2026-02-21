@@ -4,11 +4,18 @@
 environments:
   - name: "Live"
     description: "Primary Production Management Plane"
+    assurance_tier: "tier-2"
+  # - name: "Test"
+  #   description: "Testing and Validation Management Plane"
+  #   assurance_tier: "tier-10"
+  # - name: "Matt Test"
+  #   description: "Multi-Cloud Architecture Prototype (Test)"
+  #   assurance_tier: "tier-10"
 
-# --- STANDALONE ROOT SPACES ---
+# --- BOOTSTRAP ROOT SPACES ---
 # These are individual root-level containers for specific organizational needs.
-standalone_spaces:
-  - name: "Security"
+bootstrap_spaces:
+  - name: "admin"
     description: "Global Security & Compliance Governance"
-  - name: "Shared Services"
-    description: "Centralized resources available across all environments"
+  # - name: "matt-test"
+  #   description: "Centralized resources available across all environments"
