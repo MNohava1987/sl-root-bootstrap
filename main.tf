@@ -17,6 +17,13 @@ locals {
   ]...)
 }
 
+# --- 0) DYNAMIC DISCOVERY ---
+
+# Resolve the Space Admin role ID for permission granting
+data "spacelift_role" "space_admin" {
+  role_id = "space-admin"
+}
+
 # --- 1) CONSTITUTIONAL POLICIES (ENVIRONMENT-SPECIFIC) ---
 
 resource "spacelift_policy" "env_push_flow" {
@@ -82,11 +89,7 @@ resource "spacelift_stack" "admin_stacks" {
   branch       = var.admin_stacks_branch
   project_root = "/"
 
-  # ZERO-SETUP: Removed explicit VCS block. 
-  # Spacelift will automatically use the default GitHub integration.
-
   autodeploy           = var.enable_auto_deploy
-  administrative       = true
   enable_local_preview = true
 
   labels = [
@@ -96,6 +99,16 @@ resource "spacelift_stack" "admin_stacks" {
     "assurance:${local.envs[each.key].assurance_tier}",
     "governance:env-guard"
   ]
+}
+
+# MODERN REPLACEMENT FOR administrative = true
+# Grants the Orchestrator full control over its parent Environment Container.
+resource "spacelift_role_attachment" "admin_stacks" {
+  for_each = local.envs
+  
+  stack_id = spacelift_stack.admin_stacks[each.key].id
+  role_id  = data.spacelift_role.space_admin.id
+  space_id = spacelift_space.env_root[each.key].id
 }
 
 resource "spacelift_environment_variable" "orch_env_name" {
