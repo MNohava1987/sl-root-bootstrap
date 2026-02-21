@@ -1,6 +1,6 @@
 # 1) Admin space (use stable id "admin" for your trial)
 resource "spacelift_space" "admin" {
-  space_id    = var.admin_space_id
+  parent_space_id = var.admin_space_id
   name        = "Admin"
   description = "Admin control plane space"
 }
