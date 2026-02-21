@@ -2,9 +2,9 @@
 # These environments receive the full High-Assurance treatment:
 # (Container -> Admin Space -> Orchestrator Stack -> Global Policies)
 environments:
-  - name: "Live"
-    description: "Primary Production Management Plane"
-    assurance_tier: "tier-1"
+  # - name: "Live"
+  #   description: "Primary Production Management Plane"
+  #   assurance_tier: "tier-1"
   # - name: "matt-test1"
   #   description: "Testing and Validation Management Plane"
   #   assurance_tier: "tier-10"

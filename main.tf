@@ -123,10 +123,20 @@ resource "spacelift_role_attachment" "admin_stacks" {
   space_id = spacelift_space.env_root[each.key].id
 }
 
-resource "spacelift_environment_variable" "orch_env_name" {
-  for_each   = spacelift_stack.admin_stacks
-  stack_id   = each.value.id
-  name       = "TF_VAR_environment_name"
-  value      = each.key
-  write_only = false
+# --- 4) HIGH ASSURANCE VALIDATION (CHECK BLOCKS) ---
+
+# Verifies the Hard Boundary is maintained for all environments
+check "environment_isolation" {
+  assert {
+    condition     = alltrue([for s in spacelift_space.env_root : s.inherit_entities == false])
+    error_message = "Environment root spaces MUST have inherit_entities set to false for hard isolation."
+  }
+}
+
+# Verifies that all Orchestrators are correctly categorized
+check "orchestrator_governance" {
+  assert {
+    condition     = alltrue([for s in spacelift_stack.admin_stacks : contains(s.labels, "assurance:tier-1")])
+    error_message = "All orchestrator stacks MUST carry the 'assurance:tier-1' functional label."
+  }
 }
