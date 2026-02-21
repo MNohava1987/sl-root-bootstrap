@@ -20,16 +20,16 @@ echo "⚙️  Automating Configuration for $STACK_ID..."
 echo "🔑 Injecting Environment Variables..."
 
 # Public Variables
-spacectl stack environment setvar --id "$STACK_ID" TF_VAR_vcs_integration_id "$VCS_ID"
-spacectl stack environment setvar --id "$STACK_ID" TF_VAR_admin_space_id "root"
+../spacectl stack environment setvar --id "$STACK_ID" TF_VAR_vcs_integration_id "$VCS_ID"
+../spacectl stack environment setvar --id "$STACK_ID" TF_VAR_admin_space_id "root"
 
 # Secret Variables (Write-only)
-spacectl stack environment setvar --id "$STACK_ID" --write-only TF_VAR_spacelift_api_key_id "$SPACELIFT_API_KEY_ID"
-spacectl stack environment setvar --id "$STACK_ID" --write-only TF_VAR_spacelift_api_key_secret "$SPACELIFT_API_KEY_SECRET"
+../spacectl stack environment setvar --id "$STACK_ID" --write-only TF_VAR_spacelift_api_key_id "$SPACELIFT_API_KEY_ID"
+../spacectl stack environment setvar --id "$STACK_ID" --write-only TF_VAR_spacelift_api_key_secret "$SPACELIFT_API_KEY_SECRET"
 
 # 2. Trigger the Deploy
 echo "⚡ Triggering the Seed Run..."
-spacectl stack deploy --id "$STACK_ID"
+../spacectl stack deploy --id "$STACK_ID"
 
 echo "✅ Automation Complete!"
 echo "🔗 Monitor the run here: ${SPACELIFT_API_KEY_ENDPOINT}/stack/$STACK_ID"
