@@ -1,26 +1,17 @@
 package spacelift
 import rego.v1
 
-# --- HIGH ASSURANCE APPROVAL POLICY ---
+# --- HIGH ASSURANCE ENVIRONMENT APPROVAL POLICY ---
+# This policy governs orchestrators (Tier 1) and workloads (Tier 2).
 
-# 1. Tiered Assurance Guards
-# Require explicit approval for Tier 0 (Bootstrap) and Tier 1 (Orchestrators)
-approve if {
-    some tier in input.stack.labels.assurance
-    tier == "tier-0"
-}
-
+# Require explicit approval for Tier 1 Orchestrators
 approve if {
     some tier in input.stack.labels.assurance
     tier == "tier-1"
 }
 
-# 2. Environment-Specific Safeguards
-# Require approval for any stack marked as 'management' in high-assurance tiers (Tier 2+).
+# Require approval for Tier 2 Critical Workloads (Production/Live)
 approve if {
-    some type in input.stack.labels["stack-type"]
-    type == "management"
-    
     some tier in input.stack.labels.assurance
     tier == "tier-2"
 }

@@ -1,9 +1,9 @@
-# Tier 0 Governance: Define seeded policy that helps protect/govern the root stack. This should NOT grow much past this...)
+# Tier 0 Governance: Define seeded policy that helps protect/govern the root stack.
 # Policies defined in 'root' automatically govern the root space and all its children.
 resource "spacelift_policy" "root_push_flow" {
   name        = "root-git-flow"
   type        = "GIT_PUSH"
-  body        = file("${path.module}/../../policies/push/global_flow.rego")
+  body        = file("${path.module}/policies/push/global_flow.rego")
   description = "Tier 0 Governance: Enforces main-only deployments for the bootstrap stack."
   space_id    = "root"
 }
@@ -11,7 +11,7 @@ resource "spacelift_policy" "root_push_flow" {
 resource "spacelift_policy" "root_approval" {
   name        = "root-approval-law"
   type        = "APPROVAL"
-  body        = file("${path.module}/../../policies/approval/global_approval.rego")
+  body        = file("${path.module}/policies/approval/global_approval.rego")
   description = "Tier 0 Governance: Requires approval for bootstrap changes."
   space_id    = "root"
 }

@@ -8,8 +8,8 @@ locals {
   # Templates for sub-structure inside every environment (from YAML)
   boot_list           = try(local.env_data.bootstrap_spaces, [])
   bootstrap_templates = { for s in (local.boot_list == null ? [] : local.boot_list) : s.name => s }
+
   # Flattened matrix: Environment x Bootstrap Space
-  # Format: "Live.admin", "Live.Security", etc.
   env_sub_spaces = merge([
     for env_name, env in local.envs : {
       for sub_name, sub in local.bootstrap_templates : "${env_name}.${sub_name}" => {
@@ -31,13 +31,13 @@ data "spacelift_role" "space_admin" {
 # --- 1) CONSTITUTIONAL POLICIES (ENVIRONMENT-SPECIFIC) ---
 
 # Isolated Law per Container
-# Names are now unique per environment to avoid account-level slug conflicts.
+# Names are unique per environment to avoid account-level slug conflicts.
 resource "spacelift_policy" "env_push_flow" {
   for_each    = local.envs
   name        = "${lower(each.key)}-git-flow"
   type        = "GIT_PUSH"
   body        = file("${path.module}/policies/push/global_flow.rego")
-  description = "Enforces main-only deployments for management stacks in ${each.key}."
+  description = "Enforces main-only deployments for critical stacks in ${each.key}."
   space_id    = spacelift_space.env_root[each.key].id
 }
 
@@ -55,18 +55,21 @@ resource "spacelift_policy" "env_approval" {
   name        = "${lower(each.key)}-approval-law"
   type        = "APPROVAL"
   body        = file("${path.module}/policies/approval/global_approval.rego")
-  description = "Requires approval for management stacks in ${each.key}."
+  description = "Requires approval for orchestrators and critical stacks in ${each.key}."
   space_id    = spacelift_space.env_root[each.key].id
 }
 
 # --- 2) THE HIERARCHY CREATION ---
 
+# Top-level Environment Container
 resource "spacelift_space" "env_root" {
   for_each         = local.envs
   name             = each.key
   description      = each.value.description
   parent_space_id  = "root"
-  inherit_entities = true
+  
+  # HIGH ASSURANCE BOUNDARY: Turn off inheritance from root to prevent policy leakage.
+  inherit_entities = false 
 
   labels = [
     "environment:${lower(each.key)}",
@@ -75,25 +78,24 @@ resource "spacelift_space" "env_root" {
   ]
 }
 
-# Sub-spaces within each environment
-# Using a unique name per environment to satisfy account-level requirements.
+# Sub-spaces inside each environment (e.g. Live/admin)
 resource "spacelift_space" "env_sub_space" {
   for_each         = local.env_sub_spaces
-  name             = "${lower(each.value.env_name)}-${each.value.sub_name}"
+  name             = each.value.sub_name
   description      = each.value.description
   parent_space_id  = spacelift_space.env_root[each.value.env_name].id
-  inherit_entities = true
+  
+  # INTERNAL INHERITANCE: Sub-spaces inherit from their parent environment root.
+  inherit_entities = true 
 }
 
 # --- 3) ORCHESTRATION ---
 
 resource "spacelift_stack" "admin_stacks" {
   for_each    = local.envs
-  name        = "${lower(each.key)}-admin-stacks"
+  name        = "admin-stacks-orchestrator"
   description = "Orchestrator for the ${each.key} management plane"
-
-  # Resolve the ID of the 'admin' sub-space for this environment
-  space_id = spacelift_space.env_sub_space["${each.key}.admin"].id
+  space_id    = spacelift_space.env_sub_space["${each.key}.admin"].id
 
   repository   = var.admin_stacks_repo
   branch       = var.admin_stacks_branch
