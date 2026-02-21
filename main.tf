@@ -6,7 +6,6 @@ locals {
   bootstrap_templates = { for s in try(local.env_data.bootstrap_spaces, []) : s.name => s }
 
   # Flattened matrix: Environment x Bootstrap Space
-  # Format: "Live.admin", "Live.Security", etc.
   env_sub_spaces = merge([
     for env_name, env in local.envs : {
       for sub_name, sub in local.bootstrap_templates : "${env_name}.${sub_name}" => {
@@ -20,8 +19,6 @@ locals {
 
 # --- 1) CONSTITUTIONAL POLICIES (ENVIRONMENT-SPECIFIC) ---
 
-# Isolated Law per Container
-# These are local copies of the policies that live INSIDE the environment space.
 resource "spacelift_policy" "env_push_flow" {
   for_each    = local.envs
   name        = "git-flow"
@@ -51,7 +48,6 @@ resource "spacelift_policy" "env_approval" {
 
 # --- 2) THE HIERARCHY CREATION ---
 
-# The top-level Environment Container (e.g. Live)
 resource "spacelift_space" "env_root" {
   for_each        = local.envs
   name            = each.key
@@ -66,8 +62,6 @@ resource "spacelift_space" "env_root" {
   ]
 }
 
-# Sub-spaces within each environment (e.g. Live.admin, Live.Matt-Test)
-# These are driven entirely by the 'bootstrap_spaces' list in your manifest.
 resource "spacelift_space" "env_sub_space" {
   for_each        = local.env_sub_spaces
   name            = each.value.sub_name
@@ -78,35 +72,32 @@ resource "spacelift_space" "env_sub_space" {
 
 # --- 3) ORCHESTRATION ---
 
-# The Orchestrator Stack for each environment.
-# It is placed in the sub-space named "admin" (e.g. Live/admin).
 resource "spacelift_stack" "admin_stacks" {
   for_each    = local.envs
   name        = "admin-stacks"
   description = "Orchestrator for the ${each.key} management plane"
-  
-  # Dynamically resolve the ID of the 'admin' sub-space for this environment
   space_id    = spacelift_space.env_sub_space["${each.key}.admin"].id
 
   repository   = var.admin_stacks_repo
   branch       = var.admin_stacks_branch
   project_root = "/"
 
+  # ZERO-SETUP: Removed explicit VCS block. 
+  # Spacelift will automatically use the default GitHub integration.
+
   autodeploy           = var.enable_auto_deploy
   administrative       = true
   enable_local_preview = true
 
-  # Functional Labels
   labels = [
     "stack-type:management",
     "assurance:tier-1",
     "environment:${lower(each.key)}",
-    "assurance:${each.value.assurance_tier}",
+    "assurance:${local.envs[each.key].assurance_tier}",
     "governance:env-guard"
   ]
 }
 
-# Relative Awareness Injection
 resource "spacelift_environment_variable" "orch_env_name" {
   for_each   = spacelift_stack.admin_stacks
   stack_id   = each.value.id

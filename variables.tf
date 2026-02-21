@@ -1,8 +1,3 @@
-variable "vcs_integration_id" {
-  type        = string
-  description = "The ID of the default VCS integration (inherited from account)"
-}
-
 variable "admin_space_id" {
   type        = string
   default     = "root"
