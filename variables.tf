@@ -28,4 +28,9 @@ variable "admin_stacks_branch" {
   type    = string
   default = "main"
 }
-variable "enable_auto_deploy" { type = bool; default = false }
+
+variable "enable_auto_deploy" {
+  type        = bool
+  default     = false
+  description = "Enables auto-deploy for the management plane (Bootstrap Mode)"
+}
