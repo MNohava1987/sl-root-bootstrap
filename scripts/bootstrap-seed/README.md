@@ -1,17 +1,18 @@
 # Spacelift Zero-Click Bootstrap Seed
 
-This directory contains the "Bootloader" logic for a Spacelift account. Its only purpose is to establish the initial **Identity** and **Permissions** required for the account to manage itself.
+This directory contains the foundational "Bootloader" logic for a Spacelift account. Its purpose is to establish the initial **Identity**, **Permissions**, and **Governance Context** required for high-assurance management.
 
 ## Workflow
 
-:::mermaid
+```mermaid
 graph TD
     A[Manual: VCS Integration] --> B[Manual: Admin API Key]
     B --> C[Local: terraform apply]
     C --> D[Created: sl-root-bootstrap Stack]
     C --> E[Assigned: Space Admin Role]
-    D --> F[Handoff: Management Plane Cascade]
-:::
+    C --> F[Labeled: Functional Metadata]
+    D --> G[Handoff: Management Plane Cascade]
+```
 
 ## Mandatory Manual Dependencies
 Before running this seed, you must perform the following actions in the Spacelift UI:
@@ -31,10 +32,11 @@ Before running this seed, you must perform the following actions in the Spacelif
    ```bash
    export TF_VAR_spacelift_api_key_id="your-id"
    export TF_VAR_spacelift_api_key_secret="your-secret"
+   export TF_VAR_vcs_integration_slug="your-vcs-slug"
    ```
 
 2. **Configure local variables**:
-   Ensure the `vcs_integration_slug` and `vcs_namespace` in `variables.tf` match your environment.
+   Ensure the `vcs_namespace` in `variables.tf` matches your environment (default: `MNohava1987`).
 
 3. **Initialize and Seed**:
    ```bash
@@ -42,10 +44,11 @@ Before running this seed, you must perform the following actions in the Spacelif
    terraform apply -auto-approve
    ```
 
-## Outcomes
+## Functional Outcomes
 Successful execution establishes:
 - The foundational **`sl-root-bootstrap`** stack shell in the `root` space.
 - A **`Space Admin`** RBAC role attachment assigned to that stack.
+- **Assurance Tiering**: Applies `stack-type:management` and `assurance:tier-0` labels to ignite global governance policies.
 - Security hardening (Deletion protection and Local Preview enabled).
 
 ---

@@ -1,3 +1,6 @@
 environments:
   - name: "Live"
     description: "Primary Production Management Plane"
+# Future additions:
+# - name: "Staging"
+#   description: "Staging and Pre-Production"

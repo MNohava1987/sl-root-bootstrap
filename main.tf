@@ -1,5 +1,5 @@
 locals {
-  env_data = yamldecode(file("${path.module}/manifests/environments.yaml"))
+  env_data = yamldecode(file("${path.module}/manifests/management-plane.yaml"))
   envs     = { for e in local.env_data.environments : e.name => e }
 }
 
