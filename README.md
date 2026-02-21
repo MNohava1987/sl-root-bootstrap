@@ -1,33 +1,37 @@
-# Spacelift Clean-Room Trial Boilerplate (GitHub)
+# Spacelift Root Bootstrap
 
-This is a **starter** set of repos that mirrors your team's repo layout but is designed for a personal Spacelift trial.
-It is intentionally minimal and uses placeholders.
+This repository serves as the "Seed" for the entire Spacelift management plane. It follows the "Stack-of-Stacks" pattern to initialize the foundational administrative structure of your Spacelift account.
 
-## What you will prove
-- **Repave**: bootstrap -> admin-stacks -> platform layout + policies (idempotent)
-- **Onboard**: stamp a demo customer dev/test/prod stack set via a blueprint (optional)
+## Overview
 
-## One-time manual setup in Spacelift (expected)
-1. Create a **GitHub VCS integration** in Spacelift (UI).
-2. Create **one root stack** that points at `sl-root-bootstrap`.
-3. Add required env vars/secrets to that stack:
-   - `SPACELIFT_API_KEY_ID`
-   - `SPACELIFT_API_KEY_SECRET`
-   - `GITHUB_TOKEN` (if you want the scaffold/stamping option)
+The bootstrap process performs two primary actions:
+1. Creates the **Admin Space**: An isolated control plane for administrative resources.
+2. Creates the **Admin Stacks Orchestrator**: A dedicated stack that manages all downstream infrastructure (Platform Spaces, Modules, and Policies).
 
-> Notes:
-> - This boilerplate assumes the Spacelift Terraform provider is authenticated with API Key ID/Secret.
-> - Exact UI labels can vary by Spacelift version; use the "Integrations" section in UI.
+## Repository Structure
 
-## Execution order
-1. Run `sl-root-bootstrap` stack (creates admin space + `admin-stacks` stack).
-2. Run `admin-stacks` stack (creates:
-   - platform spaces
-   - module spaces
-   - baseline policies + attachments (inherited)
-   - demo customer spaces/stacks (optional: if you enable it)
-)
+```text
+.
+├── .spacelift/          # Spacelift-specific configuration and hooks
+├── docs/                # Detailed guides for setup and recovery
+├── scripts/             # Automation utilities for bootstrapping and repaving
+├── main.tf              # Primary infrastructure definitions
+├── variables.tf         # Input definitions with modern HCL formatting
+├── providers.tf         # Provider configuration
+└── versions.tf          # Version constraints for Terraform and Spacelift
+```
 
-## Replace placeholders
-Search for `__FILL_ME__` across repos.
+## Getting Started
 
+To initialize or recover this environment, please refer to the documentation:
+
+1. **New Account Setup**: See [docs/scaffolding.md](docs/scaffolding.md) for the initial CLI/UI requirements.
+2. **Standard Recovery**: See [docs/repave-guide.md](docs/repave-guide.md) for instructions on using the automated recovery script.
+
+## Automation
+
+The project includes a `scripts/repave.sh` utility designed to automate variable injection and deployment triggers once the initial stack shell is established.
+
+## Governance
+
+This project implements modern Spacelift RBAC. All administrative actions are governed by explicit Space Roles, ensuring a secure and auditable management plane.

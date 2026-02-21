@@ -1,0 +1,5 @@
+stack:
+  before_init:
+    - terraform fmt -check
+  before_plan:
+    - terraform validate
