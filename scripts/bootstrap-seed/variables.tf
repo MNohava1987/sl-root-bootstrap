@@ -31,5 +31,5 @@ variable "vcs_integration_slug" {
 variable "enable_deletion_protection" {
   type        = bool
   default     = true
-  description = "Toggles deletion protection for the foundational bootstrap stack."
+  description = "!!!!! DO NOT CHANGE THIS IF YOU DO NOT WANT THINGS TO GET DELETED !!!!!! "
 }
