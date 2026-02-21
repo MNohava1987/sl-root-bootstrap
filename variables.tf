@@ -22,6 +22,6 @@ variable "enable_auto_deploy" {
 
 variable "enable_deletion_protection" {
   type        = bool
-  default     = true
+  default     = false
   description = "!!!!! DO NOT CHANGE THIS IF YOU DO NOT WANT THINGS TO GET DELETED IT ALLOWS DELETION OF FOUNDATIONAL INFRA!!!!!! "
 }
