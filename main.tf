@@ -9,7 +9,7 @@ resource "spacelift_policy" "global_push_flow" {
   name        = "global-git-flow"
   type        = "GIT_PUSH"
   body        = file("${path.module}/policies/push/global_flow.rego")
-  description = "Enforces main-only deployments and auto-discards redundant queued runs."
+  description = "Enforces main-only deployments. Triggered by 'governance:global-flow' label."
   space_id    = "root"
 }
 
@@ -17,19 +17,23 @@ resource "spacelift_policy" "branch_env" {
   name        = "branch-env-guard"
   type        = "PLAN"
   body        = file("${path.module}/policies/branch_env.rego")
-  description = "Blocks apply if the VCS branch does not match the stack environment label."
+  description = "Blocks apply if branch name mismatch. Triggered by 'governance:env-guard' label."
   space_id    = "root"
 }
 
 # --- 2) MULTI-ENVIRONMENT HIERARCHY ---
 
-# Create the top-level Environment Containers (e.g. Prod)
+# Create the top-level Environment Containers (e.g. Live)
 resource "spacelift_space" "env_root" {
   for_each        = local.envs
   name            = each.key
   description     = each.value.description
   parent_space_id = "root"
   inherit_entities = true
+
+  # INITIALIZE GOVERNANCE LABELS
+  # Any stack inheriting these will be subject to the global policies.
+  labels = ["governance:global-flow", "governance:env-guard"]
 }
 
 # Attach Law to the Environment Root
@@ -45,7 +49,7 @@ resource "spacelift_policy_attachment" "branch_guard" {
   space_id  = each.value.id
 }
 
-# Create the Admin Space inside each Environment
+# Create the Admin Space inside each Environment (Live/Admin)
 resource "spacelift_space" "admin" {
   for_each        = spacelift_space.env_root
   name            = "Admin"
@@ -58,7 +62,7 @@ resource "spacelift_space" "admin" {
 resource "spacelift_stack" "admin_stacks" {
   for_each    = spacelift_space.admin
   name        = "admin-stacks"
-  description = "Orchestrator for the ${each.key} environment"
+  description = "Orchestrator for the ${each.key} environment management plane"
   space_id    = each.value.id
 
   repository   = var.admin_stacks_repo
@@ -69,7 +73,8 @@ resource "spacelift_stack" "admin_stacks" {
   administrative       = true
   enable_local_preview = true
 
-  # No explicit VCS ID needed here; it inherits the account default.
+  # Ensure the Orchestrator itself has the labels
+  labels = ["governance:global-flow"]
 }
 
 # --- 4) RELATIVE AWARENESS INJECTION ---
@@ -82,10 +87,8 @@ resource "spacelift_environment_variable" "orch_env_name" {
   write_only = false
 }
 
-# No VCS ID variable injection needed anymore.
-
 # --- 5) OUTPUTS ---
 
-output "admin_space_id" {
+output "management_plane_ids" {
   value = { for k, v in spacelift_space.admin : k => v.id }
 }

@@ -1,27 +1,35 @@
 package spacelift
+import rego.v1
 
-# Minimal illustrative policy:
-# - Allow any plan.
-# - For apply: require that branch matches env label.
-# This is only a sketch; adapt to Spacelift input schema.
+# --- ENVIRONMENT GUARD POLICY (Label Triggered) ---
 
-deny[msg] {
-  input.run.type == "APPLY"
-  env := input.stack.labels.environment
-  branch := input.vcs.branch
-  not branch_matches_env(branch, env)
-  msg := sprintf("Apply blocked: branch %v does not match env %v", [branch, env])
+governance_label := "governance:env-guard"
+
+deny[msg] if {
+    input.stack.labels[governance_label] # Only trigger if label exists
+    input.run.type == "APPLY"
+    env := input.stack.labels.environment
+    branch := input.vcs.branch
+    not branch_matches_env(branch, env)
+    msg := sprintf("Apply blocked: branch %v does not match env %v", [branch, env])
 }
 
-branch_matches_env(branch, env) {
-  env == "dev"
-  branch == "dev"
+branch_matches_env(branch, env) if {
+    env == "dev"
+    branch == "dev"
 }
-branch_matches_env(branch, env) {
-  env == "test"
-  branch == "test"
+
+branch_matches_env(branch, env) if {
+    env == "test"
+    branch == "test"
 }
-branch_matches_env(branch, env) {
-  env == "prod"
-  branch == "main"
+
+branch_matches_env(branch, env) if {
+    env == "prod"
+    branch == "main"
+}
+
+branch_matches_env(branch, env) if {
+    env == "live"
+    branch == "main"
 }

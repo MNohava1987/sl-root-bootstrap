@@ -1,5 +1,3 @@
 spaces:
   - name: "Admin"
-    description: "Production administrative control plane"
-  - name: "Sandbox"
-    description: "Isolated space for testing management plane changes (SoS)"
+    description: "environment specific administrative control plane"

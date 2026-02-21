@@ -1,7 +1,12 @@
+variable "vcs_integration_id" {
+  type        = string
+  description = "The ID of the default VCS integration (inherited from account)"
+}
+
 variable "admin_space_id" {
   type        = string
   default     = "root"
-  description = "Stable ID for the admin space"
+  description = "The parent space for environment containers"
 }
 
 variable "admin_stacks_repo" {
@@ -17,5 +22,5 @@ variable "admin_stacks_branch" {
 variable "enable_auto_deploy" {
   type        = bool
   default     = false
-  description = "Enables auto-deploy for the management plane (Bootstrap Mode)"
+  description = "Enables auto-deploy for the management plane orchestrators"
 }
