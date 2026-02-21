@@ -4,7 +4,7 @@ locals {
 }
 
 # --- 1) CONSTITUTIONAL POLICIES ---
-# These are the laws of the land, created once at the Root.
+# Defined at root, but enforced at the environment level.
 
 resource "spacelift_policy" "global_push_flow" {
   name        = "global-git-flow"
@@ -24,7 +24,7 @@ resource "spacelift_policy" "branch_env" {
 
 # --- 2) MULTI-ENVIRONMENT HIERARCHY ---
 
-# Create the top-level Environment Containers (e.g. Prod, Staging)
+# Create the top-level Environment Containers (e.g. Prod)
 resource "spacelift_space" "env_root" {
   for_each        = local.envs
   name            = each.key
@@ -33,10 +33,17 @@ resource "spacelift_space" "env_root" {
   inherit_entities = true
 }
 
-# Attach Global Law to every Environment Root
+# HIGH ASSURANCE ATTACHMENT:
+# Attach the law to the Environment Root (e.g. Prod) instead of the account root.
 resource "spacelift_policy_attachment" "global_flow" {
   for_each  = spacelift_space.env_root
   policy_id = spacelift_policy.global_push_flow.id
+  space_id  = each.value.id
+}
+
+resource "spacelift_policy_attachment" "branch_guard" {
+  for_each  = spacelift_space.env_root
+  policy_id = spacelift_policy.branch_env.id
   space_id  = each.value.id
 }
 
@@ -66,13 +73,12 @@ resource "spacelift_stack" "admin_stacks" {
 }
 
 # --- 4) RELATIVE AWARENESS INJECTION ---
-# This is the "Secret Sauce": We tell each orchestrator which environment it owns.
 
 resource "spacelift_environment_variable" "orch_env_name" {
   for_each   = spacelift_stack.admin_stacks
   stack_id   = each.value.id
   name       = "TF_VAR_environment_name"
-  value      = each.key # e.g. "Prod"
+  value      = each.key 
   write_only = false
 }
 
