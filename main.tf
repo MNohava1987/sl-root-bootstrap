@@ -68,11 +68,11 @@ resource "spacelift_stack" "admin_stacks" {
   autodeploy           = var.enable_auto_deploy
   administrative       = true
   enable_local_preview = true
+
+  # No explicit VCS ID needed here; it inherits the account default.
 }
 
 # --- 4) RELATIVE AWARENESS INJECTION ---
-# NO STATIC API KEYS INJECTED HERE. 
-# Stacks use their assigned RBAC Roles and Runtime Tokens.
 
 resource "spacelift_environment_variable" "orch_env_name" {
   for_each   = spacelift_stack.admin_stacks
@@ -82,13 +82,7 @@ resource "spacelift_environment_variable" "orch_env_name" {
   write_only = false
 }
 
-resource "spacelift_environment_variable" "orch_vcs_id" {
-  for_each   = spacelift_stack.admin_stacks
-  stack_id   = each.value.id
-  name       = "TF_VAR_vcs_integration_id"
-  value      = var.vcs_integration_id
-  write_only = false
-}
+# No VCS ID variable injection needed anymore.
 
 # --- 5) OUTPUTS ---
 

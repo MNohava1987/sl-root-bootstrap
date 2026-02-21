@@ -8,27 +8,32 @@ terraform {
 
 provider "spacelift" {}
 
-variable "vcs_integration_id" { type = string }
+# --- 1) DYNAMIC DISCOVERY ---
 
-# 1. Lookup the Space Admin role ID dynamically
+# Dynamically lookup the Space Admin role ID.
 data "spacelift_role" "space_admin" {
   slug = "space-admin" 
 }
 
-# 2. Create the Bootstrap Stack
+# --- 2) BOOTSTRAP STACK ---
+
 resource "spacelift_stack" "bootstrap" {
   name        = "sl-root-bootstrap"
   repository  = "sl-root-bootstrap"
   branch      = "main"
   space_id    = "root"
-  description = "Foundational Bootstrap Stack (Locally Seeded - High Assurance)"
+  description = "Foundational Bootstrap Stack (Zero-UI Seed - High Assurance)"
+
+  # NO VCS INTEGRATION ID HERE.
+  # It will automatically use the default integration configured in the account.
 
   protect_from_deletion = true
   enable_local_preview  = true
   autodeploy            = false 
 }
 
-# 3. Grant it Space Admin Role on root
+# --- 3) PERMISSIONS ---
+
 resource "spacelift_role_attachment" "bootstrap_admin" {
   space_id = "root"
   stack_id = spacelift_stack.bootstrap.id

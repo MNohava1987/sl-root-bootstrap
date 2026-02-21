@@ -1,8 +1,3 @@
-variable "vcs_integration_id" {
-  type        = string
-  description = "GitHub VCS integration id in Spacelift UI"
-}
-
 variable "admin_space_id" {
   type        = string
   default     = "root"
