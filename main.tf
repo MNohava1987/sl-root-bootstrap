@@ -18,8 +18,9 @@ resource "spacelift_policy" "branch_env" {
   space_id    = "root"
 }
 
-# --- 2) ADMIN CONTROL PLANE ---
+# --- 2) ADMIN CONTROL PLANE (COMMENTED OUT FOR RESET) ---
 
+/*
 # Admin space (The isolated management folder)
 resource "spacelift_space" "admin" {
   parent_space_id = var.admin_space_id
@@ -36,11 +37,8 @@ resource "spacelift_stack" "admin_stacks" {
   # VCS wiring
   repository   = var.admin_stacks_repo
   branch       = var.admin_stacks_branch
-  project_root = "/"
+  project_root     = "/"
 
-  # Removed to use default GitHub integration
-  # github_enterprise_id = var.vcs_integration_id
-  
   administrative       = true
   enable_local_preview = true
 }
@@ -54,3 +52,4 @@ output "admin_space_id" {
 output "admin_stacks_stack_id" {
   value = spacelift_stack.admin_stacks.id
 }
+*/
