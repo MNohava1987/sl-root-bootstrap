@@ -9,7 +9,7 @@ resource "spacelift_policy" "global_push_flow" {
   name        = "global-git-flow"
   type        = "GIT_PUSH"
   body        = file("${path.module}/policies/push/global_flow.rego")
-  description = "Enforces main-only deployments. Triggered by 'governance:global-flow' label."
+  description = "Enforces main-only deployments for management stacks."
   space_id    = "root"
 }
 
@@ -17,7 +17,15 @@ resource "spacelift_policy" "branch_env" {
   name        = "branch-env-guard"
   type        = "PLAN"
   body        = file("${path.module}/policies/branch_env.rego")
-  description = "Blocks apply if branch name mismatch. Triggered by 'governance:env-guard' label."
+  description = "Blocks apply if branch name mismatch."
+  space_id    = "root"
+}
+
+resource "spacelift_policy" "global_approval" {
+  name        = "global-approval-law"
+  type        = "APPROVAL"
+  body        = file("${path.module}/policies/approval/global_approval.rego")
+  description = "Requires approval for Tier 0 and Tier 1 stacks."
   space_id    = "root"
 }
 
@@ -31,12 +39,11 @@ resource "spacelift_space" "env_root" {
   parent_space_id = "root"
   inherit_entities = true
 
-  # INITIALIZE GOVERNANCE LABELS
-  # Any stack inheriting these will be subject to the global policies.
-  labels = ["governance:global-flow", "governance:env-guard"]
+  # Functional Labeling at the space level
+  labels = ["environment:${lower(each.key)}"]
 }
 
-# Attach Law to the Environment Root
+# Attach Law to the Environment Layer
 resource "spacelift_policy_attachment" "global_flow" {
   for_each  = spacelift_space.env_root
   policy_id = spacelift_policy.global_push_flow.id
@@ -46,6 +53,12 @@ resource "spacelift_policy_attachment" "global_flow" {
 resource "spacelift_policy_attachment" "branch_guard" {
   for_each  = spacelift_space.env_root
   policy_id = spacelift_policy.branch_env.id
+  space_id  = each.value.id
+}
+
+resource "spacelift_policy_attachment" "approval_guard" {
+  for_each  = spacelift_space.env_root
+  policy_id = spacelift_policy.global_approval.id
   space_id  = each.value.id
 }
 
@@ -62,7 +75,7 @@ resource "spacelift_space" "admin" {
 resource "spacelift_stack" "admin_stacks" {
   for_each    = spacelift_space.admin
   name        = "admin-stacks"
-  description = "Orchestrator for the ${each.key} environment management plane"
+  description = "Orchestrator for the ${each.key} management plane"
   space_id    = each.value.id
 
   repository   = var.admin_stacks_repo
@@ -73,8 +86,12 @@ resource "spacelift_stack" "admin_stacks" {
   administrative       = true
   enable_local_preview = true
 
-  # Ensure the Orchestrator itself has the labels
-  labels = ["governance:global-flow"]
+  # Functional Labels for the Orchestrator (Tier 1)
+  labels = [
+    "stack-type:management",
+    "assurance:tier-1",
+    "environment:${lower(each.key)}"
+  ]
 }
 
 # --- 4) RELATIVE AWARENESS INJECTION ---

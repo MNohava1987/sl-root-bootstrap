@@ -1,13 +1,19 @@
 package spacelift
 import rego.v1
 
-# --- GLOBAL APPROVAL POLICY (Rego v1) ---
+# --- HIGH ASSURANCE APPROVAL POLICY ---
 
-# 1. Require Approval for Administrative Stacks
-approve if input.stack.administrative == true
+# Require explicit approval for Tier 0 (Bootstrap) and Tier 1 (Orchestrators)
+approve if {
+    input.stack.labels["assurance:tier-0"]
+}
 
-# 2. Require Approval for Production Environments
-approve if input.stack.labels["environment"] == "prod"
+approve if {
+    input.stack.labels["assurance:tier-1"]
+}
 
-# 3. Default: Require at least 1 approval for everything in the root space
-approve if input.stack.space.id == "root"
+# Require approval for any stack marked as 'management' in the 'live' space
+approve if {
+    input.stack.labels["stack-type:management"]
+    input.stack.labels["environment:live"]
+}

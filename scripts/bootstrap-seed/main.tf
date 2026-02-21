@@ -13,9 +13,13 @@ resource "spacelift_stack" "bootstrap" {
     namespace = var.vcs_namespace
   }
 
-  # --- GOVERNANCE LABELS ---
-  # These enable the global policies we defined in the bootstrap repo.
-  labels = ["governance:global-flow"]
+  # --- FUNCTIONAL LABELS ---
+  # These identify the stack's role and its assurance tier.
+  # Policies use these to determine the 'Law of the Land'.
+  labels = [
+    "stack-type:management", # Enforces main-only git-flow
+    "assurance:tier-0"       # Enforces strict approval requirements
+  ]
 
   protect_from_deletion = true
   enable_local_preview  = true
