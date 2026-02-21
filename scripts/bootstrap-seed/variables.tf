@@ -27,3 +27,9 @@ variable "vcs_integration_slug" {
   default     = "sl-github-vcs-integration"
   description = "The human-readable name of your VCS integration"
 }
+
+variable "enable_deletion_protection" {
+  type        = bool
+  default     = true
+  description = "Toggles deletion protection for the foundational bootstrap stack."
+}

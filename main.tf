@@ -1,10 +1,13 @@
 locals {
   env_data = yamldecode(file("${path.module}/manifests/management-plane.yaml"))
-  envs     = { for e in local.env_data.environments : e.name => e }
+  
+  # Dual-safety: handles missing keys (via try) AND explicit nulls (via conditional)
+  envs_list = try(local.env_data.environments, [])
+  envs      = { for e in (local.envs_list == null ? [] : local.envs_list) : e.name => e }
   
   # Templates for sub-structure inside every environment (from YAML)
-  bootstrap_templates = { for s in try(local.env_data.bootstrap_spaces, []) : s.name => s }
-
+  boot_list           = try(local.env_data.bootstrap_spaces, [])
+  bootstrap_templates = { for s in (local.boot_list == null ? [] : local.boot_list) : s.name => s }
   # Flattened matrix: Environment x Bootstrap Space
   # Format: "Live.admin", "Live.Security", etc.
   env_sub_spaces = merge([
@@ -59,12 +62,12 @@ resource "spacelift_policy" "env_approval" {
 # --- 2) THE HIERARCHY CREATION ---
 
 resource "spacelift_space" "env_root" {
-  for_each        = local.envs
-  name            = each.key
-  description     = each.value.description
-  parent_space_id = "root"
+  for_each         = local.envs
+  name             = each.key
+  description      = each.value.description
+  parent_space_id  = "root"
   inherit_entities = true
-  
+
   labels = [
     "environment:${lower(each.key)}",
     "assurance:${each.value.assurance_tier}",
@@ -75,10 +78,10 @@ resource "spacelift_space" "env_root" {
 # Sub-spaces within each environment
 # Using a unique name per environment to satisfy account-level requirements.
 resource "spacelift_space" "env_sub_space" {
-  for_each        = local.env_sub_spaces
-  name            = "${lower(each.value.env_name)}-${each.value.sub_name}"
-  description     = each.value.description
-  parent_space_id = spacelift_space.env_root[each.value.env_name].id
+  for_each         = local.env_sub_spaces
+  name             = "${lower(each.value.env_name)}-${each.value.sub_name}"
+  description      = each.value.description
+  parent_space_id  = spacelift_space.env_root[each.value.env_name].id
   inherit_entities = true
 }
 
@@ -88,9 +91,9 @@ resource "spacelift_stack" "admin_stacks" {
   for_each    = local.envs
   name        = "${lower(each.key)}-admin-stacks"
   description = "Orchestrator for the ${each.key} management plane"
-  
+
   # Resolve the ID of the 'admin' sub-space for this environment
-  space_id    = spacelift_space.env_sub_space["${each.key}.admin"].id
+  space_id = spacelift_space.env_sub_space["${each.key}.admin"].id
 
   repository   = var.admin_stacks_repo
   branch       = var.admin_stacks_branch
@@ -98,6 +101,7 @@ resource "spacelift_stack" "admin_stacks" {
 
   autodeploy           = var.enable_auto_deploy
   enable_local_preview = true
+  protect_from_deletion = var.enable_deletion_protection
 
   labels = [
     "stack-type:management",
@@ -111,7 +115,7 @@ resource "spacelift_stack" "admin_stacks" {
 # Modern Replacement for administrative = true
 resource "spacelift_role_attachment" "admin_stacks" {
   for_each = local.envs
-  
+
   stack_id = spacelift_stack.admin_stacks[each.key].id
   role_id  = data.spacelift_role.space_admin.id
   space_id = spacelift_space.env_root[each.key].id
@@ -121,6 +125,6 @@ resource "spacelift_environment_variable" "orch_env_name" {
   for_each   = spacelift_stack.admin_stacks
   stack_id   = each.value.id
   name       = "TF_VAR_environment_name"
-  value      = each.key 
+  value      = each.key
   write_only = false
 }

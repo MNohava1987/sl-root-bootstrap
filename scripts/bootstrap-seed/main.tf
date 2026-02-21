@@ -37,9 +37,9 @@ resource "spacelift_stack" "bootstrap" {
     "assurance:tier-0"       # Enforces strict approval requirements
   ]
 
-  protect_from_deletion = true
+  protect_from_deletion = var.enable_deletion_protection
   enable_local_preview  = true
-  autodeploy            = false 
+  autodeploy            = false
 }
 
 # Grant the identity its power

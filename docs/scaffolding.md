@@ -1,33 +1,31 @@
-# Spacelift CLI Scaffolding (RBAC)
+# Spacelift CLI Operations
 
-This guide shows how to manage your bootstrap stack using `spacectl` and the RBAC permission model.
+This guide provides instructions for managing the high-assurance bootstrap process using the spacectl CLI.
 
-## 1. Environment Setup
+## Authentication
+
+All CLI operations require valid API credentials. Ensure the following environment variables are set:
+
 ```bash
 export SPACELIFT_API_KEY_ENDPOINT="https://your-account.spacelift.io"
 export SPACELIFT_API_KEY_ID="01K..."
 export SPACELIFT_API_KEY_SECRET="..."
 ```
 
-## 2. Permissions (RBAC)
-To grant permissions via CLI (if your user has the rights), you would typically use the UI as outlined in `REPAVE_GUIDE.md`. However, once `sl-root-bootstrap` is running, it will use its **Space Admin** role to manage the rest of your account.
+## Local Preview (Validation)
 
-## 3. Injecting Variables
-After creating the stack shell in the UI, run these to finalize the setup:
+Before committing changes to the management plane, you can run a local preview to verify the Terraform plan against the real Spacelift API without triggering a full run.
 
-```bash
-# GitHub Integration ID
-spacectl stack environment setvar --id sl-root-bootstrap TF_VAR_vcs_integration_id "your-vcs-id-here"
+1. Navigate to the root of the sl-root-bootstrap repository.
+2. Run the preview:
+   `spacectl stack local-preview --id sl-root-bootstrap`
 
-# Spacelift API Credentials
-spacectl stack environment setvar --id sl-root-bootstrap --write-only TF_VAR_spacelift_api_key_id "$SPACELIFT_API_KEY_ID"
-spacectl stack environment setvar --id sl-root-bootstrap --write-only TF_VAR_spacelift_api_key_secret "$SPACELIFT_API_KEY_SECRET"
+## Triggering Runs
 
-# Parent Space ID
-spacectl stack environment setvar --id sl-root-bootstrap TF_VAR_admin_space_id "root"
-```
+To trigger an automated run of the bootstrap process after merging changes to main:
 
-## 4. Triggering the Deployment
-```bash
-spacectl stack deploy --id sl-root-bootstrap
-```
+`spacectl stack deploy --id sl-root-bootstrap`
+
+## Keyless Governance
+
+Note that once the bootstrap stack is established via the seed, it no longer requires manual API key injection. It utilizes its assigned Space Admin RBAC role and the temporary SPACELIFT_API_TOKEN provided at runtime to manage the account hierarchy.

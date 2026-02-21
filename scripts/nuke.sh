@@ -1,35 +1,29 @@
 #!/bin/bash
 
-# Spacelift "The Nuclear Option" Script
-# Refined for High Assurance Resilience
+# Spacelift De-provisioning Script
+# This script removes the management plane resources.
 
 set -e
 
-# --- CONFIGURATION ---
-SPACECTL_PATH="../spacectl"
+# Configuration
+SPACECTL_PATH="spacectl"
 
-echo "☢️  Starting Full Wipe..."
+echo "Starting management plane removal..."
 
-# 1. Tier 2: Management Stacks
+# 1. Tier 1: Orchestrators
+# Note: Add specific environment orchestrators here as needed
 TARGETS=(
-  "admin-platformspaces" 
-  "admin-modulespaces" 
-  "admin-policies" 
-  "admin-modulestacks"
-  "sandbox-admin-stacks"
+  "live-admin-stacks"
+  "matt-test1-admin-stacks"
 )
 
 for STACK in "${TARGETS[@]}"; do
-    echo "🗑️  Deleting $STACK..."
-    $SPACECTL_PATH stack delete --id "$STACK" --skip-confirmation || echo "⚠️  $STACK already gone or skip."
+    echo "Deleting $STACK..."
+    $SPACECTL_PATH stack delete --id "$STACK" --skip-confirmation || echo "$STACK already removed or skip."
 done
 
-# 2. Tier 1: Orchestrator
-echo "🗑️  Deleting admin-stacks..."
-$SPACECTL_PATH stack delete --id "admin-stacks" --skip-confirmation || echo "⚠️  admin-stacks already gone."
+# 2. Tier 0: Bootstrap
+echo "Deleting sl-root-bootstrap..."
+$SPACECTL_PATH stack delete --id "sl-root-bootstrap" --skip-confirmation || echo "sl-root-bootstrap already removed."
 
-# 3. Tier 0: Bootstrap
-echo "🗑️  Deleting sl-root-bootstrap..."
-$SPACECTL_PATH stack delete --id "sl-root-bootstrap" --skip-confirmation || echo "⚠️  sl-root-bootstrap already gone."
-
-echo "✅ Account wipe initiated!"
+echo "Removal process completed."

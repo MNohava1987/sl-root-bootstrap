@@ -1,101 +1,71 @@
-# Spacelift Zero-Click Bootstrap Seed
+# Spacelift Bootstrap Seed: Initial Setup Guide
 
-This directory contains the foundational "Bootloader" logic for a Spacelift account. Its purpose is to establish the initial **Identity**, **Permissions**, and **Governance Context** required for high-assurance management.
+This directory contains the foundational Terraform logic required to initialize a Spacelift account from a "zero-state" (nothing created). This process establishes the initial Identity, Permissions, and Root Governance required for high-assurance management.
 
-## Workflow
+## Prerequisites
 
-```mermaid
-graph TD
-    A[Manual: VCS Integration] --> B[Manual: Admin API Key]
-    B --> C[Local: terraform apply]
-    C --> D[Created: sl-root-bootstrap Stack]
-    C --> E[Assigned: Space Admin Role]
-    C --> F[Labeled: Functional Metadata]
-    D --> G[Handoff: Management Plane Cascade]
+1. An active Spacelift account.
+2. A GitHub account with administrative access to the repositories intended for management.
+3. Terraform (v1.5+) installed on your local machine.
+
+## Phase 1: Manual Configuration in Spacelift UI
+
+Before running the automated seed, two manual connections must be established in the Spacelift web interface.
+
+### 1. Establish VCS Integration
+Spacelift requires a connection to your Version Control System to read your infrastructure code.
+
+1. Log in to your Spacelift account.
+2. Navigate to Settings in the left-hand sidebar.
+3. Select Integrations.
+4. Locate the GitHub section and click Set Up or Add.
+5. Follow the prompts to install the Spacelift GitHub App on your organization or personal account.
+6. Once established, note the Name/Slug of the integration (the default is usually "github-default" or "sl-github-vcs-integration"). You will need this for the `vcs_integration_slug` variable.
+
+### 2. Create administrative API Key
+This key is used only once to allow your local machine to communicate with Spacelift and build the initial stack.
+
+1. In the Settings menu, select API Keys.
+2. Click Create New Key.
+3. Configuration:
+   - Name: Bootstrap Seed Admin
+   - Admin Permissions: Enabled (Must be checked)
+4. Click Create.
+5. Critical: Copy the API Key ID and API Key Secret immediately. The secret is only displayed once.
+
+## Phase 2: Configuration
+
+### 1. Update Static Variables
+Open `variables.tf` in this directory and update the following default values to match your environment:
+- `spacelift_api_key_endpoint`: The full URL of your Spacelift account.
+- `vcs_namespace`: Your GitHub organization or username.
+- `vcs_integration_slug`: The name/slug of the VCS integration you created in Phase 1.
+
+### 2. Set Sensitive Environment Variables
+Set the following environment variables in your local terminal to allow Terraform to authenticate using the API key created in Phase 1.
+
+```bash
+export TF_VAR_spacelift_api_key_id="your-key-id"
+export TF_VAR_spacelift_api_key_secret="your-key-secret"
 ```
 
-## Mandatory Manual Dependencies
-Before running this seed, you must perform the following actions in the Spacelift UI:
+## Phase 3: Execution
 
-1. **VCS Integration**: 
-   - Navigate to `Settings -> Integrations`.
-   - Setup your VCS (e.g., GitHub App).
-   - Note the **Slug/Name** (e.g., `sl-github-vcs-integration`).
-2. **Admin API Key**:
-   - Navigate to `Settings -> API Keys`.
-   - Create a key with **Admin** permissions.
-   - Note the **ID** and **Secret**.
+1. Initialize Terraform:
+   `terraform init`
+2. Review the execution plan:
+   `terraform plan`
+3. Apply the configuration:
+   `terraform apply`
 
-## Usage
+## Phase 4: Verification
 
-1. **Set Environment Variables**:
-   ```bash
-   export TF_VAR_spacelift_api_key_id="your-id"
-   export TF_VAR_spacelift_api_key_secret="your-secret"
-   export TF_VAR_vcs_integration_slug="your-vcs-slug"
-   ```
+Upon successful completion, the following resources will exist in your Spacelift account:
 
-2. **Configure local variables**:
-   Ensure the `vcs_namespace` in `variables.tf` matches your environment (default: `MNohava1987`).
+1. Root Space Governance: Two policies (root-git-flow and root-approval-law) will be present in the root space. These enforce main-branch-only deployments and manual approval for the bootstrap process.
+2. Foundational Stack: A stack named "sl-root-bootstrap" will be created in the root space.
+3. Permission Grant: A Space Admin role attachment will be assigned to the sl-root-bootstrap stack, granting it the power to autonomously build the rest of your organization.
 
-3. **Initialize and Seed**:
-   ```bash
-   terraform init
-   terraform apply -auto-approve
-   ```
+## Next Steps
 
-## Functional Outcomes
-Successful execution establishes:
-- The foundational **`sl-root-bootstrap`** stack shell in the `root` space.
-- A **`Space Admin`** RBAC role attachment assigned to that stack.
-- **Assurance Tiering**: Applies `stack-type:management` and `assurance:tier-0` labels to ignite global governance policies.
-- Security hardening (Deletion protection and Local Preview enabled).
-
----
-
-<!-- BEGIN_TF_DOCS -->
-## Requirements
-
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.5 |
-| <a name="requirement_spacelift"></a> [spacelift](#requirement\_spacelift) | ~> 1.44 |
-
-## Providers
-
-| Name | Version |
-|------|---------|
-| <a name="provider_spacelift"></a> [spacelift](#provider\_spacelift) | 1.44.0 |
-
-## Modules
-
-No modules.
-
-## Resources
-
-| Name | Type |
-|------|------|
-| [spacelift_role_attachment.bootstrap_admin](https://registry.terraform.io/providers/spacelift-io/spacelift/latest/docs/resources/role_attachment) | resource |
-| [spacelift_stack.bootstrap](https://registry.terraform.io/providers/spacelift-io/spacelift/latest/docs/resources/stack) | resource |
-| [spacelift_github_enterprise_integration.target](https://registry.terraform.io/providers/spacelift-io/spacelift/latest/docs/data-sources/github_enterprise_integration) | data source |
-| [spacelift_role.space_admin](https://registry.terraform.io/providers/spacelift-io/spacelift/latest/docs/data-sources/role) | data source |
-
-## Inputs
-
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_spacelift_api_key_endpoint"></a> [spacelift\_api\_key\_endpoint](#input\_spacelift\_api\_key\_endpoint) | The URL of your Spacelift account | `string` | `"https://mnohava1987.app.us.spacelift.io"` | no |
-| <a name="input_spacelift_api_key_id"></a> [spacelift\_api\_key\_id](#input\_spacelift\_api\_key\_id) | Spacelift API Key ID with Admin permissions | `string` | n/a | yes |
-| <a name="input_spacelift_api_key_secret"></a> [spacelift\_api\_key\_secret](#input\_spacelift\_api\_key\_secret) | Spacelift API Key Secret | `string` | n/a | yes |
-| <a name="input_vcs_integration_slug"></a> [vcs\_integration\_slug](#input\_vcs\_integration\_slug) | The human-readable name of your VCS integration | `string` | `"sl-github-vcs-integration"` | no |
-| <a name="input_vcs_namespace"></a> [vcs\_namespace](#input\_vcs\_namespace) | Your GitHub Organization or ADO Project | `string` | `"MNohava1987"` | no |
-
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| <a name="output_bootstrap_stack_id"></a> [bootstrap\_stack\_id](#output\_bootstrap\_stack\_id) | The ID of the foundational sl-root-bootstrap stack. |
-| <a name="output_management_url"></a> [management\_url](#output\_management\_url) | Clickable link to manage the new stack in the Spacelift UI. |
-| <a name="output_space_admin_role_id"></a> [space\_admin\_role\_id](#output\_space\_admin\_role\_id) | The dynamically resolved ULID for the Space Admin role. |
-| <a name="output_vcs_integration_id"></a> [vcs\_integration\_id](#output\_vcs\_integration\_id) | The ID of the VCS integration linked to the bootstrap stack. |
-<!-- END_TF_DOCS -->
+Once this seed process is complete, you no longer need to manage resources locally. Navigate to the sl-root-bootstrap stack in the Spacelift UI and trigger a deployment to begin the multi-environment cascade.

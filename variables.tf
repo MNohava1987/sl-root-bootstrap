@@ -19,3 +19,9 @@ variable "enable_auto_deploy" {
   default     = false
   description = "Enables auto-deploy for the management plane orchestrators"
 }
+
+variable "enable_deletion_protection" {
+  type        = bool
+  default     = false
+  description = "!!!!! DO NOT CHANGE THIS IF YOU DO NOT WANT THINGS TO GET DELETED !!!!!! "
+}
