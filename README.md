@@ -1,6 +1,6 @@
 # Spacelift Root Bootstrap (Tier 0)
 
-This repository serves as the "Founder" for the entire Spacelift management plane. It follows a high-assurance, environment-templated pattern to initialize the foundation of your Spacelift account.
+This repository serves as the "Founder" for the entire Spacelift management plane. It follows a high-assurance, environment-templated pattern to initialize the foundation of your Spacelift account. asdf
 
 ## Overview
 
