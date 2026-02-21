@@ -9,12 +9,6 @@ resource "spacelift_policy" "global_push_flow" {
   space_id    = "root"
 }
 
-# Explicit attachment to the Root Space ensures global inheritance.
-resource "spacelift_policy_attachment" "global_push_root" {
-  policy_id = spacelift_policy.global_push_flow.id
-  space_id  = "root"
-}
-
 # Environment Guard: Ensures branch names match stack environment labels.
 resource "spacelift_policy" "branch_env" {
   name        = "branch-env-guard"
@@ -24,15 +18,11 @@ resource "spacelift_policy" "branch_env" {
   space_id    = "root"
 }
 
-# Explicit attachment to the Root Space ensures global inheritance.
-resource "spacelift_policy_attachment" "branch_env_root" {
-  policy_id = spacelift_policy.branch_env.id
-  space_id  = "root"
-}
-
 # --- 2) ADMIN CONTROL PLANE ---
 
 # Admin space (The isolated management folder)
+# We apply the policies here. Because all other spaces (Platform, Modules)
+# are children of Admin, they will inherit these policies.
 resource "spacelift_space" "admin" {
   parent_space_id = var.admin_space_id
   name            = "Admin"
@@ -40,22 +30,38 @@ resource "spacelift_space" "admin" {
   inherit_entities = true
 }
 
-# Admin-stacks stack (The Orchestrator)
+# --- 3) ATTACH POLICIES TO STACKS DIRECTLY (FOR ROOT STACKS) ---
+
+# Since we can't easily attach to the root space via TF without re-defining the 
+# root space itself (which we shouldn't do), we attach them to the Admin-Stacks
+# and Bootstrap stacks directly. 
+
+resource "spacelift_policy_attachment" "bootstrap_push" {
+  policy_id = spacelift_policy.global_push_flow.id
+  stack_id  = "sl-root-bootstrap"
+}
+
+resource "spacelift_policy_attachment" "orchestrator_push" {
+  policy_id = spacelift_policy.global_push_flow.id
+  stack_id  = spacelift_stack.admin_stacks.id
+}
+
+# --- 4) ADMIN STACKS ORCHESTRATOR ---
+
 resource "spacelift_stack" "admin_stacks" {
   name        = "admin-stacks"
   description = "Creates/applies all other admin control plane stacks"
   space_id    = spacelift_space.admin.id
 
-  # VCS wiring
   repository   = var.admin_stacks_repo
   branch       = var.admin_stacks_branch
   project_root     = "/"
-
+  
   administrative       = true
   enable_local_preview = true
 }
 
-# --- 3) OUTPUTS ---
+# --- 5) OUTPUTS ---
 
 output "admin_space_id" {
   value = spacelift_space.admin.id
