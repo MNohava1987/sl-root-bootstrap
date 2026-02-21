@@ -6,6 +6,7 @@ locals {
   bootstrap_templates = { for s in try(local.env_data.bootstrap_spaces, []) : s.name => s }
 
   # Flattened matrix: Environment x Bootstrap Space
+  # Format: "Live.admin", "Live.Security", etc.
   env_sub_spaces = merge([
     for env_name, env in local.envs : {
       for sub_name, sub in local.bootstrap_templates : "${env_name}.${sub_name}" => {
@@ -21,14 +22,16 @@ locals {
 
 # Resolve the Space Admin role ID for permission granting
 data "spacelift_role" "space_admin" {
-  slug = "space-admin"
+  role_id = "space-admin"
 }
 
 # --- 1) CONSTITUTIONAL POLICIES (ENVIRONMENT-SPECIFIC) ---
 
+# Isolated Law per Container
+# Names are now unique per environment to avoid account-level slug conflicts.
 resource "spacelift_policy" "env_push_flow" {
   for_each    = local.envs
-  name        = "git-flow"
+  name        = "${lower(each.key)}-git-flow"
   type        = "GIT_PUSH"
   body        = file("${path.module}/policies/push/global_flow.rego")
   description = "Enforces main-only deployments for management stacks in ${each.key}."
@@ -37,7 +40,7 @@ resource "spacelift_policy" "env_push_flow" {
 
 resource "spacelift_policy" "env_branch_guard" {
   for_each    = local.envs
-  name        = "branch-env-guard"
+  name        = "${lower(each.key)}-branch-guard"
   type        = "PLAN"
   body        = file("${path.module}/policies/branch_env.rego")
   description = "Blocks apply if branch name mismatch in ${each.key}."
@@ -46,7 +49,7 @@ resource "spacelift_policy" "env_branch_guard" {
 
 resource "spacelift_policy" "env_approval" {
   for_each    = local.envs
-  name        = "approval-law"
+  name        = "${lower(each.key)}-approval-law"
   type        = "APPROVAL"
   body        = file("${path.module}/policies/approval/global_approval.rego")
   description = "Requires approval for management stacks in ${each.key}."
@@ -69,9 +72,11 @@ resource "spacelift_space" "env_root" {
   ]
 }
 
+# Sub-spaces within each environment
+# Using a unique name per environment to satisfy account-level requirements.
 resource "spacelift_space" "env_sub_space" {
   for_each        = local.env_sub_spaces
-  name            = each.value.sub_name
+  name            = "${lower(each.value.env_name)}-${each.value.sub_name}"
   description     = each.value.description
   parent_space_id = spacelift_space.env_root[each.value.env_name].id
   inherit_entities = true
@@ -81,8 +86,10 @@ resource "spacelift_space" "env_sub_space" {
 
 resource "spacelift_stack" "admin_stacks" {
   for_each    = local.envs
-  name        = "admin-stacks"
+  name        = "${lower(each.key)}-admin-stacks"
   description = "Orchestrator for the ${each.key} management plane"
+  
+  # Resolve the ID of the 'admin' sub-space for this environment
   space_id    = spacelift_space.env_sub_space["${each.key}.admin"].id
 
   repository   = var.admin_stacks_repo
@@ -101,8 +108,7 @@ resource "spacelift_stack" "admin_stacks" {
   ]
 }
 
-# MODERN REPLACEMENT FOR administrative = true
-# Grants the Orchestrator full control over its parent Environment Container.
+# Modern Replacement for administrative = true
 resource "spacelift_role_attachment" "admin_stacks" {
   for_each = local.envs
   
