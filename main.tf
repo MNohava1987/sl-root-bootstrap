@@ -33,18 +33,21 @@ resource "spacelift_policy" "global_approval" {
   space_id    = "root"
 }
 
-# Attach Approval to Management Stacks (to ensure Tier 1 review)
-resource "spacelift_policy_attachment" "orchestrator_approval" {
-  policy_id = spacelift_policy.global_approval.id
-  stack_id  = spacelift_stack.admin_stacks.id
+# --- 2) HIGH ASSURANCE ADOPTION (IMPORT) ---
+# These blocks allow the stack to "Adopt" existing spaces if they exist
+# after a stack-only deletion. 
+
+import {
+  to = spacelift_space.admin
+  id = "admin-01KHZ5NMNY08MFM52W8ZW2CC5V"
 }
 
-resource "spacelift_policy_attachment" "sandbox_orchestrator_approval" {
-  policy_id = spacelift_policy.global_approval.id
-  stack_id  = spacelift_stack.sandbox_admin_stacks.id
+import {
+  to = spacelift_space.sandbox
+  id = "spacelift-sandbox-01KHZC7CVKJMNJ3DP20W6ZDK2C"
 }
 
-# --- 2) ADMIN CONTROL PLANE ---
+# --- 3) ADMIN CONTROL PLANE ---
 
 # Admin space (Production Management)
 resource "spacelift_space" "admin" {
@@ -84,7 +87,7 @@ resource "spacelift_stack" "sandbox_admin_stacks" {
   space_id    = spacelift_space.sandbox.id
 
   repository   = var.admin_stacks_repo
-  branch       = "develop" # We use develop here to test changes before merging to main
+  branch       = "develop"
   project_root = "/"
 
   autodeploy           = var.enable_auto_deploy
@@ -92,7 +95,7 @@ resource "spacelift_stack" "sandbox_admin_stacks" {
   enable_local_preview = true
 }
 
-# --- 3) OUTPUTS ---
+# --- 4) OUTPUTS ---
 
 output "admin_space_id" {
   value = spacelift_space.admin.id
@@ -100,12 +103,4 @@ output "admin_space_id" {
 
 output "sandbox_space_id" {
   value = spacelift_space.sandbox.id
-}
-
-output "admin_stacks_stack_id" {
-  value = spacelift_stack.admin_stacks.id
-}
-
-output "sandbox_stacks_stack_id" {
-  value = spacelift_stack.sandbox_admin_stacks.id
 }
