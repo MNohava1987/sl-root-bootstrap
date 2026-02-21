@@ -1,6 +1,9 @@
 locals {
   env_data = yamldecode(file("${path.module}/manifests/management-plane.yaml"))
   envs     = { for e in local.env_data.environments : e.name => e }
+  
+  # Map standalone spaces for for_each
+  standalone = { for s in try(local.env_data.standalone_spaces, []) : s.name => s }
 }
 
 # --- 1) CONSTITUTIONAL POLICIES ---
@@ -29,7 +32,17 @@ resource "spacelift_policy" "global_approval" {
   space_id    = "root"
 }
 
-# --- 2) MULTI-ENVIRONMENT HIERARCHY ---
+# --- 2) STANDALONE ROOT SPACES ---
+
+resource "spacelift_space" "standalone" {
+  for_each        = local.standalone
+  name            = each.key
+  description     = each.value.description
+  parent_space_id = "root"
+  inherit_entities = true
+}
+
+# --- 3) THE "LIVE" HIERARCHY (TEMPLATED) ---
 
 # Create the top-level Environment Containers (e.g. Live)
 resource "spacelift_space" "env_root" {
@@ -39,11 +52,10 @@ resource "spacelift_space" "env_root" {
   parent_space_id = "root"
   inherit_entities = true
 
-  # Functional Labeling at the space level
   labels = ["environment:${lower(each.key)}"]
 }
 
-# Attach Law to the Environment Layer
+# Attach Global Law to the Environment Layer
 resource "spacelift_policy_attachment" "global_flow" {
   for_each  = spacelift_space.env_root
   policy_id = spacelift_policy.global_push_flow.id
@@ -70,7 +82,7 @@ resource "spacelift_space" "admin" {
   inherit_entities = true
 }
 
-# --- 3) ENVIRONMENT-AWARE ORCHESTRATORS ---
+# --- 4) ENVIRONMENT-AWARE ORCHESTRATORS ---
 
 resource "spacelift_stack" "admin_stacks" {
   for_each    = spacelift_space.admin
@@ -86,7 +98,6 @@ resource "spacelift_stack" "admin_stacks" {
   administrative       = true
   enable_local_preview = true
 
-  # Functional Labels for the Orchestrator (Tier 1)
   labels = [
     "stack-type:management",
     "assurance:tier-1",
@@ -94,7 +105,7 @@ resource "spacelift_stack" "admin_stacks" {
   ]
 }
 
-# --- 4) RELATIVE AWARENESS INJECTION ---
+# --- 5) RELATIVE AWARENESS INJECTION ---
 
 resource "spacelift_environment_variable" "orch_env_name" {
   for_each   = spacelift_stack.admin_stacks
@@ -104,8 +115,12 @@ resource "spacelift_environment_variable" "orch_env_name" {
   write_only = false
 }
 
-# --- 5) OUTPUTS ---
+# --- 6) OUTPUTS ---
 
 output "management_plane_ids" {
   value = { for k, v in spacelift_space.admin : k => v.id }
+}
+
+output "standalone_space_ids" {
+  value = { for k, v in spacelift_space.standalone : k => v.id }
 }

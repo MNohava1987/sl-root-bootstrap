@@ -1,6 +1,14 @@
+# --- TEMPLATED ENVIRONMENTS ---
+# These environments receive the full High-Assurance treatment:
+# (Container -> Admin Space -> Orchestrator Stack -> Global Policies)
 environments:
   - name: "Live"
     description: "Primary Production Management Plane"
-# Future additions:
-# - name: "Staging"
-#   description: "Staging and Pre-Production"
+
+# --- STANDALONE ROOT SPACES ---
+# These are individual root-level containers for specific organizational needs.
+standalone_spaces:
+  - name: "Security"
+    description: "Global Security & Compliance Governance"
+  - name: "Shared Services"
+    description: "Centralized resources available across all environments"
