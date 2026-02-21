@@ -22,7 +22,7 @@ locals {
 
 # Resolve the Space Admin role ID for permission granting
 data "spacelift_role" "space_admin" {
-  slug = "Space admin"
+  slug = "space-admin"
 }
 
 # --- 1) CONSTITUTIONAL POLICIES (ENVIRONMENT-SPECIFIC) ---
