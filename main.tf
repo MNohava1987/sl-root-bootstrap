@@ -17,7 +17,9 @@ resource "spacelift_stack" "admin_stacks" {
   project_root     = "/" # adjust if repo is monorepo
 
   # Link to your GitHub integration (from Spacelift UI)
-  vcs_integration_id = var.vcs_integration_id
+  github_options {
+    id = var.vcs_integration_id
+  }
 
   terraform_workflow_tool = "TERRAFORM"
 }
