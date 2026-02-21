@@ -24,14 +24,21 @@ This ensures that one environment's management plane is logically and operationa
 The management plane uses functional labeling to enforce tiered governance across all stacks.
 
 ### Assurance Tiers
-- Tier 0: Foundational identity and root governance (Managed by the Seed).
-- Tier 1: Management plane orchestrators (Created by this project).
-- Tier 2+: Environment-specific workloads and infrastructure.
+
+The system uses a tiered model to categorize stacks and apply appropriate guardrails:
+
+- **Tier 0 (Root/Bootstrap)**: The foundational identity and root governance. Managed by the initial seed process. These stacks have organization-wide permissions and require the strictest approval workflows.
+- **Tier 1 (Orchestrators)**: Stacks that manage the management plane for specific environments. Created and managed by the Tier 0 bootstrap stack. These orchestrators own the environment-level spaces and policies.
+- **Tier 2 (Critical Workloads)**: High-assurance environment workloads (e.g., Production, Live). These are governed by strict main-only git flows and require manual confirmation for all applies.
+- **Tier 3+ (Standard Workloads)**: Development, testing, or sandbox environments. These may have relaxed governance, such as allowing deployments from non-main branches or auto-deployments.
 
 ### Mandatory Labels
-- `stack-type:management`: Triggers strict Git Flow policies (Main-branch only deployments).
-- `assurance:tier-X`: Determines the level of scrutiny and approval required for changes.
-- `governance:env-guard`: Triggers branch-to-environment matching policies.
+
+Policies utilize the following labels to determine the "Law of the Land":
+
+- `stack-type:management`: Identifies stacks that manage the platform itself. Triggers strict Git Flow policies (Main-branch only deployments).
+- `assurance:tier-X`: Categorizes the stack into one of the tiers defined above. This is used by approval policies to determine if a run requires explicit confirmation.
+- `governance:env-guard`: Triggers branch-to-environment matching policies to ensure, for example, that only the `main` branch can be applied to `Tier 2` environments.
 
 ## Management Manifest
 
@@ -39,7 +46,7 @@ The hierarchy is driven entirely by `manifests/management-plane.yaml`. Scaling t
 
 ## Setup and Operation
 
-1. Establishing the Identity: The initial sl-root-bootstrap stack must be established locally via the bootstrap-seed process.
-2. Multi-Environment Cascade: Once the bootstrap stack is live, it autonomously manages the environments defined in the manifest.
+1. **Establishing the Identity**: The initial `sl-root-bootstrap` stack must be established locally via the bootstrap-seed process.
+2. **Multi-Environment Cascade**: Once the bootstrap stack is live, it autonomously manages the environments defined in the manifest.
 
-For detailed instructions on the initial seeding process, see scripts/bootstrap-seed/README.md.
+For detailed instructions on the initial seeding process, see `scripts/bootstrap-seed/README.md`.

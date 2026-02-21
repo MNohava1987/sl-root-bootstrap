@@ -15,11 +15,18 @@ deny contains msg if {
 
 # Helper to map branches to assurance tiers
 is_branch_compliant(branch, labels) if {
-    labels["assurance:tier-2"]
+    some tier in labels.assurance
+    tier == "tier-2"
     branch == "main"
 }
 
 is_branch_compliant(branch, labels) if {
-    not labels["assurance:tier-2"]
+    not is_tier_2(labels)
     branch == "test" # Allow non-tier-2 to use test branch
+}
+
+# Helper: Check if the stack is Tier 2
+is_tier_2(labels) if {
+    some tier in labels.assurance
+    tier == "tier-2"
 }

@@ -6,16 +6,21 @@ import rego.v1
 # 1. Tiered Assurance Guards
 # Require explicit approval for Tier 0 (Bootstrap) and Tier 1 (Orchestrators)
 approve if {
-    input.stack.labels["assurance:tier-0"]
+    some tier in input.stack.labels.assurance
+    tier == "tier-0"
 }
 
 approve if {
-    input.stack.labels["assurance:tier-1"]
+    some tier in input.stack.labels.assurance
+    tier == "tier-1"
 }
 
 # 2. Environment-Specific Safeguards
 # Require approval for any stack marked as 'management' in high-assurance tiers (Tier 2+).
 approve if {
-    input.stack.labels["stack-type:management"]
-    input.stack.labels["assurance:tier-2"]
+    some type in input.stack.labels["stack-type"]
+    type == "management"
+    
+    some tier in input.stack.labels.assurance
+    tier == "tier-2"
 }
