@@ -9,7 +9,7 @@ resource "spacelift_space" "admin" {
 resource "spacelift_stack" "admin_stacks" {
   name        = "admin-stacks"
   description = "Creates/applies all other admin control plane stacks"
-  space_id    = spacelift_space.admin.space_id
+  space_id    = spacelift_space.admin.id
 
   # VCS wiring (GitHub)
   repository       = var.admin_stacks_repo
@@ -23,7 +23,7 @@ resource "spacelift_stack" "admin_stacks" {
 }
 
 output "admin_space_id" {
-  value = spacelift_space.admin.space_id
+  value = spacelift_space.admin.id
 }
 
 output "admin_stacks_stack_id" {
