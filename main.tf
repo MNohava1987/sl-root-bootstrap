@@ -1,3 +1,4 @@
+/*
 # 1) Admin space (use stable id "admin" for your trial)
 resource "spacelift_space" "admin" {
   parent_space_id = var.admin_space_id
@@ -16,10 +17,8 @@ resource "spacelift_stack" "admin_stacks" {
   branch           = var.admin_stacks_branch
   project_root     = "/" # adjust if repo is monorepo
 
-  # Link to your GitHub integration (from Spacelift UI)
   # Removed to use default
   # github_enterprise_id = var.vcs_integration_id
-
 }
 
 output "admin_space_id" {
@@ -29,3 +28,4 @@ output "admin_space_id" {
 output "admin_stacks_stack_id" {
   value = spacelift_stack.admin_stacks.id
 }
+*/
