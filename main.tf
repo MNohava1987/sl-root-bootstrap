@@ -20,7 +20,6 @@ resource "spacelift_stack" "admin_stacks" {
   # Removed to use default
   # github_enterprise_id = var.vcs_integration_id
 
-  terraform_workflow_tool = "TERRAFORM"
 }
 
 output "admin_space_id" {
