@@ -8,6 +8,15 @@ The bootstrap process performs two primary actions:
 1. Creates the **Admin Space**: An isolated control plane for administrative resources.
 2. Creates the **Admin Stacks Orchestrator**: A dedicated stack that manages all downstream infrastructure (Platform Spaces, Modules, and Policies).
 
+> [!IMPORTANT]
+> **Administrative Permissions Required**
+>
+> This stack manages account-wide resources (Spaces, Stacks, and Policies). To function correctly, it must be granted elevated permissions:
+> 1. **Administrative Toggle**: Located in the stack's **Settings -> Behavior** tab. This must be set to **ON**.
+> 2. **RBAC Role**: Grant this stack the **Space Admin** role on the **root** space via the Spaces UI.
+>
+> *Note: While the Administrative toggle is currently being deprecated in favor of RBAC roles, both should be applied for maximum compatibility during the transition period.*
+
 ## Repository Structure
 
 ```text
