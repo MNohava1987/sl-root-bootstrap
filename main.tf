@@ -4,7 +4,6 @@ locals {
 }
 
 # --- 1) CONSTITUTIONAL POLICIES ---
-# Defined at root, but enforced at the environment level.
 
 resource "spacelift_policy" "global_push_flow" {
   name        = "global-git-flow"
@@ -33,8 +32,7 @@ resource "spacelift_space" "env_root" {
   inherit_entities = true
 }
 
-# HIGH ASSURANCE ATTACHMENT:
-# Attach the law to the Environment Root (e.g. Prod) instead of the account root.
+# Attach Law to the Environment Root
 resource "spacelift_policy_attachment" "global_flow" {
   for_each  = spacelift_space.env_root
   policy_id = spacelift_policy.global_push_flow.id
@@ -73,6 +71,8 @@ resource "spacelift_stack" "admin_stacks" {
 }
 
 # --- 4) RELATIVE AWARENESS INJECTION ---
+# NO STATIC API KEYS INJECTED HERE. 
+# Stacks use their assigned RBAC Roles and Runtime Tokens.
 
 resource "spacelift_environment_variable" "orch_env_name" {
   for_each   = spacelift_stack.admin_stacks
@@ -82,26 +82,16 @@ resource "spacelift_environment_variable" "orch_env_name" {
   write_only = false
 }
 
-resource "spacelift_environment_variable" "orch_api_id" {
-  for_each   = spacelift_stack.admin_stacks
-  stack_id   = each.value.id
-  name       = "TF_VAR_spacelift_api_key_id"
-  value      = var.spacelift_api_key_id
-  write_only = true
-}
-
-resource "spacelift_environment_variable" "orch_api_secret" {
-  for_each   = spacelift_stack.admin_stacks
-  stack_id   = each.value.id
-  name       = "TF_VAR_spacelift_api_key_secret"
-  value      = var.spacelift_api_key_secret
-  write_only = true
-}
-
 resource "spacelift_environment_variable" "orch_vcs_id" {
   for_each   = spacelift_stack.admin_stacks
   stack_id   = each.value.id
   name       = "TF_VAR_vcs_integration_id"
   value      = var.vcs_integration_id
   write_only = false
+}
+
+# --- 5) OUTPUTS ---
+
+output "admin_space_id" {
+  value = { for k, v in spacelift_space.admin : k => v.id }
 }

@@ -1,4 +1,4 @@
-provider "spacelift" {
-  api_key_id     = var.spacelift_api_key_id
-  api_key_secret = var.spacelift_api_key_secret
-}
+# The Spacelift provider will automatically use the SPACELIFT_API_TOKEN
+# provided at runtime by the Spacelift worker. 
+# This eliminates the need for static API keys.
+provider "spacelift" {}

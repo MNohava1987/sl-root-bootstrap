@@ -28,6 +28,7 @@ export SPACELIFT_API_KEY_SECRET="..."
    ```bash
    export TF_VAR_vcs_integration_id="your-vcs-id"
    terraform init
+   terraform plan
    terraform apply -auto-approve
    ```
 
