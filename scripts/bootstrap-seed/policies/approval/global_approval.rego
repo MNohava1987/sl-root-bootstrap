@@ -1,4 +1,4 @@
-package spacelift
+package spacelift.seed
 import rego.v1
 
 # --- TIER 0 (ROOT) APPROVAL POLICY ---

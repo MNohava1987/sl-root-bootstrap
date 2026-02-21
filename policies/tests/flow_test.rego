@@ -1,7 +1,8 @@
-package spacelift
+package spacelift.env
+import rego.v1
 
 # Test: Management stack MUST use main for Tracked Run
-test_track_management_main {
+test_track_management_main if {
     track with input as {
         "stack": {
             "labels": {
@@ -15,7 +16,7 @@ test_track_management_main {
 }
 
 # Test: Management stack DOES NOT track on develop
-test_no_track_management_develop {
+test_no_track_management_develop if {
     not track with input as {
         "stack": {
             "labels": {
@@ -29,7 +30,7 @@ test_no_track_management_develop {
 }
 
 # Test: Management stack triggers PROPOSE on develop
-test_propose_management_develop {
+test_propose_management_develop if {
     propose with input as {
         "stack": {
             "labels": {
@@ -43,7 +44,7 @@ test_propose_management_develop {
 }
 
 # Test: Non-management stack can track on any branch
-test_track_standard_any_branch {
+test_track_standard_any_branch if {
     track with input as {
         "stack": {
             "labels": {

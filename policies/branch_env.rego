@@ -1,4 +1,4 @@
-package spacelift
+package spacelift.env
 import rego.v1
 
 # --- ENVIRONMENT GUARD POLICY (Label Triggered) ---
