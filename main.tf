@@ -10,7 +10,7 @@ resource "spacelift_policy" "global_push_flow" {
 }
 
 # Explicit attachment to the Root Space ensures global inheritance.
-resource "spacelift_policy_attachment" "global_push_root" {
+resource "spacelift_policy_attachment" "bootstrap_push" {
   policy_id = spacelift_policy.global_push_flow.id
   stack_id  = "sl-root-bootstrap"
 }
@@ -33,10 +33,15 @@ resource "spacelift_policy" "global_approval" {
   space_id    = "root"
 }
 
-# Attach Approval to Admin Stacks specifically (to ensure Tier 1 review)
+# Attach Approval to Management Stacks (to ensure Tier 1 review)
 resource "spacelift_policy_attachment" "orchestrator_approval" {
   policy_id = spacelift_policy.global_approval.id
   stack_id  = spacelift_stack.admin_stacks.id
+}
+
+resource "spacelift_policy_attachment" "sandbox_orchestrator_approval" {
+  policy_id = spacelift_policy.global_approval.id
+  stack_id  = spacelift_stack.sandbox_admin_stacks.id
 }
 
 # --- 2) ADMIN CONTROL PLANE ---
@@ -57,14 +62,29 @@ resource "spacelift_space" "sandbox" {
   inherit_entities = true
 }
 
-# Admin-stacks stack (The Orchestrator)
+# Admin-stacks stack (The Production Orchestrator)
 resource "spacelift_stack" "admin_stacks" {
   name        = "admin-stacks"
-  description = "Creates/applies all other admin control plane stacks"
+  description = "Production Orchestrator for administrative stacks"
   space_id    = spacelift_space.admin.id
 
   repository   = var.admin_stacks_repo
   branch       = var.admin_stacks_branch
+  project_root = "/"
+
+  autodeploy           = var.enable_auto_deploy
+  administrative       = true
+  enable_local_preview = true
+}
+
+# Sandbox-admin-stacks (The Testing Orchestrator)
+resource "spacelift_stack" "sandbox_admin_stacks" {
+  name        = "sandbox-admin-stacks"
+  description = "Experimental Orchestrator for testing management plane changes"
+  space_id    = spacelift_space.sandbox.id
+
+  repository   = var.admin_stacks_repo
+  branch       = "develop" # We use develop here to test changes before merging to main
   project_root = "/"
 
   autodeploy           = var.enable_auto_deploy
@@ -84,4 +104,8 @@ output "sandbox_space_id" {
 
 output "admin_stacks_stack_id" {
   value = spacelift_stack.admin_stacks.id
+}
+
+output "sandbox_stacks_stack_id" {
+  value = spacelift_stack.sandbox_admin_stacks.id
 }
