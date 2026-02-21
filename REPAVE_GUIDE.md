@@ -1,38 +1,36 @@
-# Spacelift Repave & Bootstrap Guide
+# Spacelift RBAC Bootstrap Guide (Future-Proof)
 
-This guide details how to rebuild your Spacelift management plane from scratch.
+This guide details how to rebuild your Spacelift management plane using the modern Role-Based Access Control (RBAC) system.
 
 ## Phase 1: One-Time Setup (Manual)
-These steps are required only once per Spacelift account.
-1. **GitHub Integration**: Go to `Settings -> Integrations -> GitHub` and install the Spacelift App.
-2. **VCS ID**: Copy the ID of the integration (e.g., `sl-github-vcs-integration`).
-3. **API Key**: Go to `Settings -> API Keys` and create an **Admin** key.
+1. **GitHub Integration**: `Settings -> Integrations -> GitHub` -> Install App.
+2. **VCS ID**: Copy the Integration ID.
+3. **API Key**: `Settings -> API Keys` -> Create **Admin** key.
 
-## Phase 2: Resetting the Environment (The "Destroy")
-If you are doing a full repave:
-1. **Delete the Admin Space**: In the UI, go to `Spaces`, find `Admin`, and delete it. (This cleans up all child stacks).
-2. **Delete the Bootstrap Stack**: Delete the `sl-root-bootstrap` stack.
-
-## Phase 3: The "Seed" Shell (Manual)
-You must create the very first stack manually to establish the trust link.
+## Phase 2: The "Seed" Stack (Manual)
+You must create the first identity manually to establish the trust link.
 1. **Create Stack**:
    - **Name**: `sl-root-bootstrap`
    - **Space**: `root`
    - **Repo**: `sl-root-bootstrap`
    - **Branch**: `main`
-2. **Enable Admin Permissions**:
-   - Go to the stack's `Settings -> Infrastructure`.
-   - Toggle **Administrative** to **ON**.
-   - Click **Save**.
+
+## Phase 3: Granting Permissions via RBAC (Manual)
+Instead of using the deprecated "Administrative" toggle, you now assign a Space Role:
+1. Go to **Spaces** in the main navigation.
+2. Select the **root** space.
+3. Click the **Access** tab.
+4. Click **Add Access**.
+5. **Actor**: Select **Stack** and choose `sl-root-bootstrap`.
+6. **Role**: Select **Space Admin**.
+7. Click **Save**.
+
+*Note: The stack now has full power over the root space and all its children via explicit RBAC.*
 
 ## Phase 4: Automated Configuration (The "Repave" Script)
-Run the script to inject all variables and trigger the build.
+Run the script to inject variables and trigger the build.
 
 ```bash
 export VCS_ID="your-vcs-id"
 ./repave.sh
 ```
-
-## Phase 5: Verification
-1. Monitor the `sl-root-bootstrap` run.
-2. Once finished, verify the `Admin` space and `admin-stacks` exist.
