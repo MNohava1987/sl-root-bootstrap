@@ -14,22 +14,27 @@ set -e
 
 STACK_ID="sl-root-bootstrap"
 
-echo "Automating Configuration for $STACK_ID..."
+echo " Automating Configuration for $STACK_ID..."
 
 # 1. Inject Variables (This ensures no typos and handles secrets securely)
 echo " Injecting Environment Variables..."
 
 # Public Variables
-../../spacectl stack environment setvar --id "$STACK_ID" TF_VAR_vcs_integration_id "$VCS_ID"
-../../spacectl stack environment setvar --id "$STACK_ID" TF_VAR_admin_space_id "root"
+../spacectl stack environment setvar --id "$STACK_ID" TF_VAR_vcs_integration_id "$VCS_ID"
+../spacectl stack environment setvar --id "$STACK_ID" TF_VAR_admin_space_id "root"
+
+# ENABLE AUTO-DEPLOY (Bootstrap Mode)
+# This causes the entire chain (Bootstrap -> Orchestrator -> Children) to cascade automatically.
+../spacectl stack environment setvar --id "$STACK_ID" TF_VAR_enable_auto_deploy "true"
 
 # Secret Variables (Write-only)
-../../spacectl stack environment setvar --id "$STACK_ID" --write-only TF_VAR_spacelift_api_key_id "$SPACELIFT_API_KEY_ID"
-../../spacectl stack environment setvar --id "$STACK_ID" --write-only TF_VAR_spacelift_api_key_secret "$SPACELIFT_API_KEY_SECRET"
+../spacectl stack environment setvar --id "$STACK_ID" --write-only TF_VAR_spacelift_api_key_id "$SPACELIFT_API_KEY_ID"
+../spacectl stack environment setvar --id "$STACK_ID" --write-only TF_VAR_spacelift_api_key_secret "$SPACELIFT_API_KEY_SECRET"
 
 # 2. Trigger the Deploy
 echo " Triggering the Seed Run..."
-../../spacectl stack deploy --id "$STACK_ID"
+../spacectl stack deploy --id "$STACK_ID"
 
 echo " Automation Complete!"
 echo " Monitor the run here: ${SPACELIFT_API_KEY_ENDPOINT}/stack/$STACK_ID"
+echo " Note: Once the full restoration is complete, update TF_VAR_enable_auto_deploy to 'false' to lock it down."
