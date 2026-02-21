@@ -57,6 +57,7 @@ resource "spacelift_stack" "admin_stacks" {
   branch       = var.admin_stacks_branch
   project_root     = "/"
   
+  autodeploy = var.enable_auto_deploy
   administrative       = true
   enable_local_preview = true
 }

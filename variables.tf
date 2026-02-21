@@ -28,3 +28,4 @@ variable "admin_stacks_branch" {
   type    = string
   default = "main"
 }
+variable "enable_auto_deploy" { type = bool; default = false }
