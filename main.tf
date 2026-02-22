@@ -6,7 +6,7 @@ locals {
   )
   enabled_envs = [
     for e in local.envs_list : e
-    if try(e.enabled, true)
+    if local.cfg_enable_component && try(e.enabled, true)
   ]
   envs = local.cfg_enable_component ? {
     for e in local.enabled_envs : e.name => e
@@ -19,7 +19,7 @@ locals {
   )
   enabled_bootstrap_spaces = [
     for s in local.boot_list : s
-    if try(s.enabled, true)
+    if local.cfg_enable_component && try(s.enabled, true)
   ]
   bootstrap_templates = {
     for s in local.enabled_bootstrap_spaces : s.name => s

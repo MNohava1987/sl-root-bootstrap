@@ -6,7 +6,7 @@ locals {
 }
 
 resource "spacelift_role" "profile" {
-  for_each = local.cfg_enable_custom_role_profiles ? local.custom_role_profiles : {}
+  for_each = local.cfg_enable_component && local.cfg_enable_custom_role_profiles ? local.custom_role_profiles : {}
 
   name    = "${local.cfg_naming_org}-${local.cfg_naming_domain}-${local.cfg_naming_function_role_prefix}-${each.key}"
   actions = each.value

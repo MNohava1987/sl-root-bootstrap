@@ -2,7 +2,7 @@ manifest_version: 1
 
 settings:
   enable_component: true
-  enable_auto_deploy: true
+  enable_auto_deploy: false
   enable_deletion_protection: false
   repave_mode: true
 

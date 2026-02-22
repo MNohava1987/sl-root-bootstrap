@@ -1,6 +1,6 @@
 locals {
   manifest_version      = try(local.env_data.manifest_version, null)
-  env_names             = [for e in(local.envs_list == null ? [] : local.envs_list) : e.name]
+  env_names             = [for e in local.enabled_envs : e.name]
   env_names_lower       = [for name in local.env_names : lower(name)]
   assurance_tiers       = [for e in values(local.envs) : e.assurance_tier]
   bootstrap_space_names = [for s in local.enabled_bootstrap_spaces : s.name]
