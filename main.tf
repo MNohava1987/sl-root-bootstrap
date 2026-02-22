@@ -121,3 +121,27 @@ resource "spacelift_role_attachment" "admin_stacks" {
   role_id  = data.spacelift_role.space_admin.id
   space_id = spacelift_space.env_root[each.key].id
 }
+
+# Ensure Tier-1 orchestrators always receive exact environment context values
+# from bootstrap, avoiding path/casing drift in downstream lookups.
+resource "spacelift_environment_variable" "admin_stacks_context_vars" {
+  for_each = merge([
+    for env_name, stack in spacelift_stack.admin_stacks : {
+      "${env_name}.TF_VAR_environment_name" = {
+        stack_id = stack.id
+        name     = "TF_VAR_environment_name"
+        value    = env_name
+      }
+      "${env_name}.TF_VAR_assurance_tier" = {
+        stack_id = stack.id
+        name     = "TF_VAR_assurance_tier"
+        value    = local.envs[env_name].assurance_tier
+      }
+    }
+  ]...)
+
+  stack_id   = each.value.stack_id
+  name       = each.value.name
+  value      = each.value.value
+  write_only = false
+}
