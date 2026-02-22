@@ -12,7 +12,7 @@ environments:
     description: "Primary Production Management Plane"
     assurance_tier: "tier-1"
   - name: "matt-test1"
-    enabled: false
+    enabled: true
     description: "Testing and Validation Management Plane"
     assurance_tier: "tier-10"
 
