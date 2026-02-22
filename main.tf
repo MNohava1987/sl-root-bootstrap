@@ -1,11 +1,23 @@
 locals {
   # Read environments safely. Handles missing keys and explicit null values.
   envs_list = try(local.env_data.environments, [])
-  envs      = { for e in(local.envs_list == null ? [] : local.envs_list) : e.name => e }
+  enabled_envs = [
+    for e in(local.envs_list == null ? [] : local.envs_list) : e
+    if try(e.enabled, true)
+  ]
+  envs = local.cfg_enable_component ? {
+    for e in local.enabled_envs : e.name => e
+  } : {}
 
   # Read bootstrap sub-space templates from manifest.
-  boot_list           = try(local.env_data.bootstrap_spaces, [])
-  bootstrap_templates = { for s in(local.boot_list == null ? [] : local.boot_list) : s.name => s }
+  boot_list = try(local.env_data.bootstrap_spaces, [])
+  enabled_bootstrap_spaces = [
+    for s in(local.boot_list == null ? [] : local.boot_list) : s
+    if try(s.enabled, true)
+  ]
+  bootstrap_templates = {
+    for s in local.enabled_bootstrap_spaces : s.name => s
+  }
 
   # Build Environment x Bootstrap Space matrix.
   env_sub_spaces = merge([
@@ -157,6 +169,16 @@ resource "spacelift_environment_variable" "admin_stacks_context_vars" {
         name     = "TF_VAR_admin_sub_space_name"
         value    = "admin"
       }
+      "${env_name}.TF_VAR_repave_mode" = {
+        stack_id = stack.id
+        name     = "TF_VAR_repave_mode"
+        value    = tostring(local.cfg_repave_mode)
+      }
+      "${env_name}.TF_VAR_enable_deletion_protection" = {
+        stack_id = stack.id
+        name     = "TF_VAR_enable_deletion_protection"
+        value    = tostring(local.cfg_enable_deletion_protection)
+      }
     }
   ]...)
 
@@ -173,7 +195,7 @@ resource "spacelift_stack_destructor" "admin_stacks" {
   stack_id = each.value.id
 
   discard_runs = true
-  deactivated  = !var.repave_mode
+  deactivated  = !local.cfg_repave_mode
 
   depends_on = [
     spacelift_role_attachment.admin_stacks,

@@ -1,13 +1,22 @@
 manifest_version: 1
 
+settings:
+  enable_component: true
+  enable_auto_deploy: true
+  enable_deletion_protection: false
+  repave_mode: true
+
 environments:
-  # - name: "Live"
-  #   description: "Primary Production Management Plane"
-  #   assurance_tier: "tier-1"
+  - name: "Live"
+    enabled: false
+    description: "Primary Production Management Plane"
+    assurance_tier: "tier-1"
   # - name: "matt-test1"
+  #   enabled: false
   #   description: "Testing and Validation Management Plane"
   #   assurance_tier: "tier-10"
 
 bootstrap_spaces:
   - name: "admin"
+    enabled: true
     description: "Global Security & Compliance Governance"

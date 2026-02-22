@@ -5,12 +5,14 @@ locals {
   rbac_manifest_path = "${path.module}/manifests/rbac/role-catalog.yaml"
   rbac_manifest      = try(yamldecode(file(local.rbac_manifest_path)), null)
 
-  # Bootstrap behavior is intentionally variable-driven to keep repave workflows
-  # simple and reduce manifest sprawl.
+  cfg_enable_component = try(local.env_data.settings.enable_component, true)
+
+  # Bootstrap behavior is manifest-driven with variable fallbacks.
   cfg_admin_stacks_repo          = var.admin_stacks_repo
   cfg_admin_stacks_branch        = var.admin_stacks_branch
-  cfg_enable_auto_deploy         = var.enable_auto_deploy
-  cfg_enable_deletion_protection = var.enable_deletion_protection
+  cfg_enable_auto_deploy         = try(local.env_data.settings.enable_auto_deploy, var.enable_auto_deploy)
+  cfg_enable_deletion_protection = try(local.env_data.settings.enable_deletion_protection, var.enable_deletion_protection)
+  cfg_repave_mode                = try(local.env_data.settings.repave_mode, var.repave_mode)
 
   # Naming is also variable-driven. Keep a single source of truth in variables.tf.
   cfg_naming_org                          = var.naming_org

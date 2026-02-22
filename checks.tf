@@ -3,7 +3,7 @@ locals {
   env_names             = [for e in(local.envs_list == null ? [] : local.envs_list) : e.name]
   env_names_lower       = [for name in local.env_names : lower(name)]
   assurance_tiers       = [for e in values(local.envs) : e.assurance_tier]
-  bootstrap_space_names = [for s in(local.boot_list == null ? [] : local.boot_list) : s.name]
+  bootstrap_space_names = [for s in local.enabled_bootstrap_spaces : s.name]
 
   naming_function_tokens = [
     local.cfg_naming_function_admin_stacks,
@@ -61,6 +61,18 @@ check "rbac_manifest_version_supported" {
   assert {
     condition     = !fileexists(local.rbac_manifest_path) || contains(var.manifest_supported_versions, try(local.rbac_manifest.manifest_version, -1))
     error_message = "RBAC catalog manifest must declare a supported manifest_version."
+  }
+}
+
+check "manifest_settings_flags_boolean" {
+  assert {
+    condition = alltrue([
+      can(tobool(local.cfg_enable_component)),
+      can(tobool(local.cfg_enable_auto_deploy)),
+      can(tobool(local.cfg_enable_deletion_protection)),
+      can(tobool(local.cfg_repave_mode))
+    ])
+    error_message = "topology settings flags (enable_component, enable_auto_deploy, enable_deletion_protection, repave_mode) must be boolean."
   }
 }
 
@@ -229,7 +241,7 @@ check "custom_role_profiles_require_non_admin_actions" {
 
 check "destructive_changes_require_repave_mode" {
   assert {
-    condition     = local.cfg_enable_deletion_protection || var.repave_mode
+    condition     = local.cfg_enable_deletion_protection || local.cfg_repave_mode
     error_message = "Disabling deletion protection requires repave_mode=true for explicit operator intent."
   }
 }
