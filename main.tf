@@ -1,8 +1,11 @@
 locals {
   # Read environments safely. Handles missing keys and explicit null values.
-  envs_list = try(local.env_data.environments, [])
+  envs_list = try(
+    [for e in local.env_data.environments : e],
+    []
+  )
   enabled_envs = [
-    for e in(local.envs_list == null ? [] : local.envs_list) : e
+    for e in local.envs_list : e
     if try(e.enabled, true)
   ]
   envs = local.cfg_enable_component ? {
@@ -10,9 +13,12 @@ locals {
   } : {}
 
   # Read bootstrap sub-space templates from manifest.
-  boot_list = try(local.env_data.bootstrap_spaces, [])
+  boot_list = try(
+    [for s in local.env_data.bootstrap_spaces : s],
+    []
+  )
   enabled_bootstrap_spaces = [
-    for s in(local.boot_list == null ? [] : local.boot_list) : s
+    for s in local.boot_list : s
     if try(s.enabled, true)
   ]
   bootstrap_templates = {
