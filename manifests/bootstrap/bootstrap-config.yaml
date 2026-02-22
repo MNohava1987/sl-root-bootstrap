@@ -4,4 +4,4 @@ bootstrap:
   admin_stacks_repo: "sl-admin-stacks"
   admin_stacks_branch: "main"
   enable_auto_deploy: false
-  enable_deletion_protection: false
+  enable_deletion_protection: true
