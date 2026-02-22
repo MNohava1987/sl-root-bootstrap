@@ -1,12 +1,12 @@
 variable "enable_deletion_protection" {
   type        = bool
-  default     = true
+  default     = false
   description = "DANGER: If false, foundational stacks can be deleted. Keep true for normal operations."
 }
 
 variable "repave_mode" {
   type        = bool
-  default     = false
+  default     = true
   description = "Explicit repave mode switch. Set true only during controlled teardown/rebuild operations."
 }
 
