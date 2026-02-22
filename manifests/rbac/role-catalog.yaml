@@ -1,8 +1,8 @@
 manifest_version: 1
 
 settings:
-  enable_custom_role_profiles: false
-  allow_space_admin_in_custom_profiles: false
+  enable_custom_role_profiles: true
+  allow_space_admin_in_custom_profiles: true
 
 role_profile_actions:
   stack-manager:
@@ -24,6 +24,7 @@ role_profile_actions:
   space-manager:
     - SPACE_READ
     - SPACE_WRITE
+    - SPACE_ADMIN
   policy-manager:
     - SPACE_READ
     - SPACE_WRITE
