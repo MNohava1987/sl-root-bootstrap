@@ -1,9 +1,9 @@
 manifest_version: 1
 
 environments:
-  # - name: "Live"
-  #   description: "Primary Production Management Plane"
-  #   assurance_tier: "tier-1"
+  - name: "Live"
+    description: "Primary Production Management Plane"
+    assurance_tier: "tier-1"
   # - name: "matt-test1"
   #   description: "Testing and Validation Management Plane"
   #   assurance_tier: "tier-10"
