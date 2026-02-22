@@ -8,7 +8,7 @@ settings:
 
 environments:
   - name: "Live"
-    enabled: true
+    enabled: false
     description: "Primary Production Management Plane"
     assurance_tier: "tier-1"
   - name: "matt-test1"
@@ -18,5 +18,5 @@ environments:
 
 bootstrap_spaces:
   - name: "admin"
-    enabled: true
+    enabled: false
     description: "Global Security & Compliance Governance"
