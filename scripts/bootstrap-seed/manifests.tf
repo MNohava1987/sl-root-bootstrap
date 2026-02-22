@@ -5,6 +5,7 @@ locals {
 
   cfg_bootstrap_stack_repository = try(local.bootstrap_manifest.bootstrap.bootstrap_stack_repository, var.bootstrap_stack_repository)
   cfg_bootstrap_stack_branch     = try(local.bootstrap_manifest.bootstrap.bootstrap_stack_branch, var.bootstrap_stack_branch)
+  cfg_enable_deletion_protection = try(local.bootstrap_manifest.bootstrap.enable_deletion_protection, var.enable_deletion_protection)
 
   cfg_naming_org                          = try(local.bootstrap_manifest.naming.org, var.naming_org)
   cfg_naming_env                          = try(local.bootstrap_manifest.naming.env, var.naming_env)

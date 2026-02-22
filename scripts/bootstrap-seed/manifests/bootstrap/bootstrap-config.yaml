@@ -3,6 +3,7 @@ manifest_version: 1
 bootstrap:
   bootstrap_stack_repository: "sl-root-bootstrap"
   bootstrap_stack_branch: "main"
+  enable_deletion_protection: true
 
 naming:
   org: "sl"

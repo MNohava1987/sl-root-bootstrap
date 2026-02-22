@@ -7,6 +7,7 @@ All notable changes to the Spacelift Zero-Click Bootstrap Seed will be documente
 - Seed manifest support in `scripts/bootstrap-seed/manifests/bootstrap/bootstrap-config.yaml`.
 - Seed manifest loader and schema check in `scripts/bootstrap-seed/manifests.tf`.
 - Manifest-driven stack branch control with `bootstrap_stack_branch`.
+- Manifest-driven deletion protection control with `bootstrap.enable_deletion_protection`.
 
 ### Changed
 - Seed stack and root policy names now resolve from manifest naming tokens with variable fallback.

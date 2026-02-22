@@ -43,7 +43,7 @@ resource "spacelift_stack" "bootstrap" {
 
   # DANGER: Turning this off allows deletion of the bootstrap identity.
   # Keep enabled unless you are intentionally repaving Tier-0.
-  protect_from_deletion = var.enable_deletion_protection
+  protect_from_deletion = local.cfg_enable_deletion_protection
   enable_local_preview  = true
   autodeploy            = false
 }

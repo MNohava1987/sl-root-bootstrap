@@ -39,6 +39,7 @@ This key is used only once to allow your local machine to communicate with Space
 Open `manifests/bootstrap/bootstrap-config.yaml` and update values to match your environment:
 - `bootstrap.bootstrap_stack_repository`
 - `bootstrap.bootstrap_stack_branch`
+- `bootstrap.enable_deletion_protection`
 - `naming.org`, `naming.env`, `naming.domain`
 - `naming.function_bootstrap`, `naming.function_policy_git_flow`, `naming.function_policy_approval_law`
 
