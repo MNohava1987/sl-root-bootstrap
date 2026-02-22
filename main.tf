@@ -165,3 +165,18 @@ resource "spacelift_environment_variable" "admin_stacks_context_vars" {
   value      = each.value.value
   write_only = false
 }
+
+# Execute in-stack destroys before deleting Tier-1 orchestrators during repave.
+resource "spacelift_stack_destructor" "admin_stacks" {
+  for_each = spacelift_stack.admin_stacks
+
+  stack_id = each.value.id
+
+  discard_runs = true
+  deactivated  = !var.repave_mode
+
+  depends_on = [
+    spacelift_role_attachment.admin_stacks,
+    spacelift_environment_variable.admin_stacks_context_vars
+  ]
+}
