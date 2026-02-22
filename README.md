@@ -12,28 +12,28 @@ Detailed documentation is organized by functional area in the `docs/` directory:
 
 - **[Architecture Blueprint](docs/architecture.md)**: Cellular isolation, assurance tiering, and logical hierarchy.
 - **[Operations Manual](docs/operations.md)**: Manifest management, CLI usage, and validation gates.
-- **[Naming Standard](docs/naming-standard.md)**: Token catalog and enforcement rules for resource naming.
 - **[Recovery Manifesto](docs/recovery.md)**: Definitive step-by-step instructions for Nuke and Pave operations.
-- **[Bootstrap Seed Guide](scripts/bootstrap-seed/README.md)**: Instructions for the local "Bootloader" setup.
+- **[Bootstrap Seed Guide](https://github.com/MNohava1987/sl-root-bootstrap-seed)**: Instructions for the local "Bootloader" setup.
 
 ## Quick Start
 
-1. **Seeding**: Initialize the foundational identity and root policies via the [Bootstrap Seed process](scripts/bootstrap-seed/README.md).
+1. **Seeding**: Initialize the foundational identity and root policies via the [Bootstrap Seed process](https://github.com/MNohava1987/sl-root-bootstrap-seed/blob/main/README.md).
 2. **Handoff**: Trigger the `sl-root-mgmt-bootstrap` stack in the Spacelift UI to build the multi-environment cascade defined in `manifests/topology/management-plane.yaml`.
 3. **Validation**: Use `local-preview` via `spacectl` to verify changes before merging to `main`.
 
 ## Maintenance
 
-The management plane is manifest-driven with grouped catalogs under `manifests/`:
+The management plane is manifest-driven with two focused catalogs under `manifests/`:
 - `manifests/topology/management-plane.yaml`
-- `manifests/bootstrap/bootstrap-config.yaml`
-- `manifests/governance/naming-catalog.yaml`
 - `manifests/rbac/role-catalog.yaml`
 
 RBAC profile ownership is managed in bootstrap:
 - Custom roles are created in `rbac.tf` when `enable_custom_role_profiles=true`.
 - Downstream repos consume `role_profile_role_slugs` and `role_catalog` outputs.
 - Guardrails in `checks.tf` prevent non-admin profiles from silently remaining `space-admin` unless explicitly allowed.
+- Destructive operations require explicit intent:
+  - keep `enable_deletion_protection=true` by default
+  - set `repave_mode=true` when intentionally running repave/teardown procedures
 
 Run assurance gates locally before merge:
 `./scripts/assurance-gate.sh`

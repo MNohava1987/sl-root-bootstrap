@@ -21,9 +21,9 @@ To add a new sub-space (e.g., `audit`, `networking`) to **every** environment:
 ## Manifest Groups
 
 - Topology: `manifests/topology/management-plane.yaml`
-- Bootstrap settings: `manifests/bootstrap/bootstrap-config.yaml`
-- Naming catalog: `manifests/governance/naming-catalog.yaml`
 - RBAC catalog: `manifests/rbac/role-catalog.yaml`
+
+Bootstrap and naming behavior are intentionally variable-driven to keep repave operations simpler and reduce config sprawl.
 
 ## CLI Operations
 
@@ -49,5 +49,11 @@ Every run executes the following automated checks before the plan phase:
 3. Manifest contract validation through Terraform `check` blocks at plan time.
 4. `opa test`: Executes recursive unit tests for Rego policies under `policies/`.
 
-By default, seed policy tests under `scripts/bootstrap-seed/policies/` are excluded from the root assurance gate. To include them, set:
+By default, seed policy tests under `https://github.com/MNohava1987/sl-root-bootstrap-seed/policies/` are excluded from the root assurance gate. To include them, set:
 `INCLUDE_SEED_POLICY_TESTS=true`.
+
+## Repave Safety Model
+
+- Default posture: `enable_deletion_protection=true`, `repave_mode=false`.
+- Controlled teardown posture: set `repave_mode=true` and then set `enable_deletion_protection=false`.
+- Terraform checks block accidental destructive posture changes unless repave mode is explicitly enabled.

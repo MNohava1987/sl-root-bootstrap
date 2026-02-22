@@ -1,15 +1,15 @@
 # Management Plane Architecture
 
 This architecture is intentionally split into two separate control planes:
-1. Local bootstrap seed (`scripts/bootstrap-seed`) that establishes root trust.
+1. Local bootstrap seed (`https://github.com/MNohava1987/sl-root-bootstrap-seed`) that establishes root trust.
 2. Runtime bootstrap stack (`sl-root-mgmt-bootstrap`) that runs inside Spacelift and builds environment cells.
 
-## Diagram 1: Local Seed Control Plane (`scripts/bootstrap-seed`)
+## Diagram 1: Local Seed Control Plane (`https://github.com/MNohava1987/sl-root-bootstrap-seed`)
 
 ```mermaid
 flowchart TD
     Operator[Platform engineer local machine]
-    SeedCode[scripts/bootstrap-seed Terraform]
+    SeedCode[https://github.com/MNohava1987/sl-root-bootstrap-seed Terraform]
     LocalChecks[Manual local checks\nterraform fmt/validate/plan\noptional opa test on seed policies]
     Apply[terraform apply local]
     Stop[Seed stops here handoff complete]
@@ -30,7 +30,7 @@ flowchart TD
 ### Seed Testing and Execution Mode
 
 - `terraform fmt`, `terraform validate`, `terraform plan`: local/manual.
-- optional `opa test ./scripts/bootstrap-seed/policies`: local/manual.
+- optional `opa test ./https://github.com/MNohava1987/sl-root-bootstrap-seed/policies`: local/manual.
 - execution context: local Terraform using admin API key.
 - stopping point: after `sl-root-mgmt-bootstrap` stack and root governance are created.
 

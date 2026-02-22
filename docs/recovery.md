@@ -27,7 +27,7 @@ Safety Note: Destruction is protected by variables to prevent accidental executi
 4. Trigger a run of the `sl-root-mgmt-bootstrap` stack. Spacelift will autonomously delete all environment spaces, local policies, and orchestrator stacks.
 
 ### Step 3: Unlock and Destroy the Foundation
-1. Navigate to `scripts/bootstrap-seed/variables.tf`.
+1. Navigate to `https://github.com/MNohava1987/sl-root-bootstrap-seed/variables.tf`.
 2. Set `enable_deletion_protection = false`.
 3. Set sensitive credentials if not already in your environment:
    `export TF_VAR_spacelift_api_key_id="xxx"`
@@ -42,7 +42,7 @@ Safety Note: Destruction is protected by variables to prevent accidental executi
 ## Part 2: The "Pave" (Complete Restoration)
 
 ### Step 1: establish Root of Trust (Tier 0)
-Follow the instructions in `scripts/bootstrap-seed/README.md` to run the local seed.
+Follow the instructions in `https://github.com/MNohava1987/sl-root-bootstrap-seed/README.md` to run the local seed.
 1. Ensure `enable_deletion_protection = true` in `variables.tf`.
 2. Run `terraform init` and `terraform apply`.
 3. Verification: The `sl-root-mgmt-bootstrap` stack and root policies will appear in the Spacelift Root space.

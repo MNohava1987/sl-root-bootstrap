@@ -10,7 +10,7 @@ This repository enforces institutional-grade guardrails with a layered gate mode
 
 2. Policy checks:
 - `opa test ./policies -v`
-- Optional: `INCLUDE_SEED_POLICY_TESTS=true` to run `scripts/bootstrap-seed/policies` tests.
+- Optional: `INCLUDE_SEED_POLICY_TESTS=true` to run `https://github.com/MNohava1987/sl-root-bootstrap-seed/policies` tests.
 
 3. Contract checks (Terraform `check` blocks in `checks.tf`):
 - `manifest_version` must exist and be in `manifest_supported_versions`.
@@ -19,6 +19,7 @@ This repository enforces institutional-grade guardrails with a layered gate mode
 - Required bootstrap spaces enforced via `required_bootstrap_space_names`.
 - Naming contract checks for `<org>-<env>-<domain>-<function>` token validity, pattern, allow-lists, and max length.
 - Environment isolation and orchestrator label integrity assertions.
+- Destructive changes require explicit `repave_mode=true` when deletion protection is disabled.
 
 ## Local Usage
 
@@ -36,6 +37,7 @@ Use stack variables to tune contract behavior:
 - `allowed_assurance_tiers`
 - `required_bootstrap_space_names`
 - `enforce_lowercase_environment_names`
+- `repave_mode`
 - `naming_org`
 - `naming_domain`
 - `naming_function_admin_stacks`

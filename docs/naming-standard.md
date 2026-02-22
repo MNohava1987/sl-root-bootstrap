@@ -3,7 +3,7 @@
 This repository uses a unified naming convention for platform entities:
 `<org>-<env>-<domain>-<function>`
 
-Source file: `manifests/governance/naming-catalog.yaml`.
+Source of truth: naming variables in `variables.tf` and contract checks in `checks.tf`.
 
 Custom roles use a role-specific variant:
 `<org>-<domain>-role-<profile>`

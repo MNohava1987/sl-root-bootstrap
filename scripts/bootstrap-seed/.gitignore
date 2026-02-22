@@ -1,8 +1,0 @@
-# Local terraform state
-*.tfstate
-*.tfstate.*
-.terraform/
-
-# Secret files
-*.tfvars
-*.tfvars.json

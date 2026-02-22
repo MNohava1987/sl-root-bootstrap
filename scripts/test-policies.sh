@@ -13,7 +13,3 @@ if ! command -v opa >/dev/null 2>&1; then
 fi
 
 opa test ./policies -v
-
-if [[ "${INCLUDE_SEED_POLICY_TESTS:-false}" == "true" ]]; then
-  opa test ./scripts/bootstrap-seed/policies -v
-fi

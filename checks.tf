@@ -57,20 +57,6 @@ check "manifest_version_supported" {
   }
 }
 
-check "bootstrap_manifest_version_supported" {
-  assert {
-    condition     = !fileexists(local.bootstrap_manifest_path) || contains(var.manifest_supported_versions, try(local.bootstrap_manifest.manifest_version, -1))
-    error_message = "Bootstrap manifest must declare a supported manifest_version."
-  }
-}
-
-check "naming_manifest_version_supported" {
-  assert {
-    condition     = !fileexists(local.naming_manifest_path) || contains(var.manifest_supported_versions, try(local.naming_manifest.manifest_version, -1))
-    error_message = "Naming catalog manifest must declare a supported manifest_version."
-  }
-}
-
 check "rbac_manifest_version_supported" {
   assert {
     condition     = !fileexists(local.rbac_manifest_path) || contains(var.manifest_supported_versions, try(local.rbac_manifest.manifest_version, -1))
@@ -238,5 +224,12 @@ check "custom_role_profiles_require_non_admin_actions" {
       ]
     ]))
     error_message = "Custom role profiles must not include SPACE_ADMIN unless allow_space_admin_in_custom_profiles is true."
+  }
+}
+
+check "destructive_changes_require_repave_mode" {
+  assert {
+    condition     = local.cfg_enable_deletion_protection || var.repave_mode
+    error_message = "Disabling deletion protection requires repave_mode=true for explicit operator intent."
   }
 }
