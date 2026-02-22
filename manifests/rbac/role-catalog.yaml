@@ -1,7 +1,7 @@
 manifest_version: 1
 
 settings:
-  enable_custom_role_profiles: true
+  enable_custom_role_profiles: false
   allow_space_admin_in_custom_profiles: false
 
 role_profile_actions:
@@ -31,8 +31,8 @@ role_profile_actions:
     - SPACE_READ
 
 role_profile_role_slugs:
-  stack-manager: space-admin
-  space-manager: space-admin
-  policy-manager: space-admin
-  readonly-auditor: space-admin
+  stack-manager: sl-mgmt-role-stack-manager
+  space-manager: sl-mgmt-role-space-manager
+  policy-manager: sl-mgmt-role-policy-manager
+  readonly-auditor: sl-mgmt-role-readonly-auditor
   space-admin: space-admin
