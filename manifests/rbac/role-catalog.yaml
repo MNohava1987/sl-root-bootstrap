@@ -1,8 +1,8 @@
 manifest_version: 1
 
 settings:
-  enable_custom_role_profiles: false # TODO: re-enable after teardown
-  allow_space_admin_in_custom_profiles: false # TODO: re-enable after teardown
+  enable_custom_role_profiles: true
+  allow_space_admin_in_custom_profiles: true
 
 role_profile_actions:
   stack-manager:
@@ -24,7 +24,7 @@ role_profile_actions:
   space-manager:
     - SPACE_READ
     - SPACE_WRITE
-    # - SPACE_ADMIN # TODO: re-enable after teardown
+    - SPACE_ADMIN
   policy-manager:
     - SPACE_READ
     - SPACE_WRITE
