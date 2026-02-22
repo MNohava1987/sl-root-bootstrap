@@ -2,7 +2,7 @@
 
 This architecture is intentionally split into two separate control planes:
 1. Local bootstrap seed (`scripts/bootstrap-seed`) that establishes root trust.
-2. Runtime bootstrap stack (`sl-root-bootstrap`) that runs inside Spacelift and builds environment cells.
+2. Runtime bootstrap stack (`sl-root-mgmt-bootstrap`) that runs inside Spacelift and builds environment cells.
 
 ## Diagram 1: Local Seed Control Plane (`scripts/bootstrap-seed`)
 
@@ -14,8 +14,8 @@ flowchart TD
     Apply[terraform apply local]
     Stop[Seed stops here handoff complete]
 
-    RootPolicies[Created in root\nroot-git-flow GIT_PUSH\nroot-approval-law APPROVAL]
-    RootStack[Created stack\nsl-root-bootstrap tier-0]
+    RootPolicies[Created in root\nsl-root-mgmt-git-flow GIT_PUSH\nsl-root-mgmt-approval-law APPROVAL]
+    RootStack[Created stack\nsl-root-mgmt-bootstrap tier-0]
     RootRole[Created role attachment\nSpace Admin on root]
 
     Operator --> SeedCode
@@ -32,27 +32,27 @@ flowchart TD
 - `terraform fmt`, `terraform validate`, `terraform plan`: local/manual.
 - optional `opa test ./scripts/bootstrap-seed/policies`: local/manual.
 - execution context: local Terraform using admin API key.
-- stopping point: after `sl-root-bootstrap` stack and root governance are created.
+- stopping point: after `sl-root-mgmt-bootstrap` stack and root governance are created.
 
-## Diagram 2: Runtime Control Plane (`sl-root-bootstrap` in Spacelift)
+## Diagram 2: Runtime Control Plane (`sl-root-mgmt-bootstrap` in Spacelift)
 
 ```mermaid
 flowchart TD
     Commit[Commit to repo]
-    RuntimeStack[Spacelift stack sl-root-bootstrap]
+    RuntimeStack[Spacelift stack sl-root-mgmt-bootstrap]
     Hooks[Automatic before_plan hooks\n.spacelift/config.yml]
     Gate[scripts/assurance-gate.sh]
     PolicyTests[opa test ./policies]
     Validate[terraform fmt check and terraform validate]
     PlanApply[Plan and apply of root module]
     Checks[Terraform check blocks in checks.tf]
-    Manifest[manifests/management-plane.yaml]
+    Manifest[manifests/topology/management-plane.yaml]
 
     subgraph Cell[Per environment cell]
       EnvRoot[Top-level environment space\ninherit_entities=false]
       EnvPolicies[Environment policies\nGIT_PUSH PLAN APPROVAL]
       SubSpaces[Subspaces from bootstrap_spaces\nfor example admin]
-      Orch[Tier-1 orchestrator stack\n${environment}-admin-stacks-orchestrator]
+      Orch[Tier-1 orchestrator stack\nsl-live-mgmt-admin-stacks-orchestrator]
       RoleAttach[Space Admin role attachment\nscoped to environment root]
     end
 
@@ -108,7 +108,7 @@ flowchart LR
 
 | Tier | Name | Responsibility | Identity |
 | :--- | :--- | :--- | :--- |
-| **Tier 0** | Foundation | Establish root of trust and bootstrap identity | `sl-root-bootstrap` |
-| **Tier 1** | Orchestrator | Manage environment hierarchy and local governance | `${environment}-admin-stacks-orchestrator` |
+| **Tier 0** | Foundation | Establish root of trust and bootstrap identity | `sl-root-mgmt-bootstrap` |
+| **Tier 1** | Orchestrator | Manage environment hierarchy and local governance | `sl-<env>-mgmt-admin-stacks-orchestrator` |
 | **Tier 2** | Critical Workload | Mission-critical infrastructure | production/live workloads |
 | **Tier 3+** | Standard Workload | General application resources | dev/test workloads |

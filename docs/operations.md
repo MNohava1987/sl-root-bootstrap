@@ -4,7 +4,7 @@ This document provides instructions for the routine management, scaling, and val
 
 ## Manifest Management
 
-The environment hierarchy is driven by `manifests/management-plane.yaml`. 
+The environment hierarchy is driven by `manifests/topology/management-plane.yaml`.
 
 ### Adding an Environment:
 To provision a new environment container and its associated orchestrator:
@@ -15,7 +15,15 @@ To provision a new environment container and its associated orchestrator:
 ### Adding Sub-Spaces:
 To add a new sub-space (e.g., `audit`, `networking`) to **every** environment:
 1. Add the space name and description to the `bootstrap_spaces` list in the manifest.
-2. Apply the change via the `sl-root-bootstrap` stack.
+2. Apply the change via the `sl-root-mgmt-bootstrap` stack.
+
+
+## Manifest Groups
+
+- Topology: `manifests/topology/management-plane.yaml`
+- Bootstrap settings: `manifests/bootstrap/bootstrap-config.yaml`
+- Naming catalog: `manifests/governance/naming-catalog.yaml`
+- RBAC catalog: `manifests/rbac/role-catalog.yaml`
 
 ## CLI Operations
 
@@ -29,7 +37,7 @@ export TF_VAR_spacelift_api_key_secret="..."
 
 ### Local Validation (Zero-Commit)
 Before committing changes, use `spacectl` to run a preview plan on Spacelift workers:
-`spacectl stack local-preview --id sl-root-bootstrap`
+`spacectl stack local-preview --id sl-root-mgmt-bootstrap`
 
 You can also run the local assurance gate from this repo root:
 `scripts/assurance-gate.sh`

@@ -1,11 +1,11 @@
-# --- DYNAMIC DISCOVERY ---
+# --- Dynamic Discovery ---
 
-# Find the VCS ID using the provided Slug
+# Resolve VCS integration by slug.
 data "spacelift_github_enterprise_integration" "target" {
   id = var.vcs_integration_slug
 }
 
-# Find the Space Admin Role ID
+# Resolve Space Admin role.
 data "spacelift_role" "space_admin" {
   slug = "space-admin"
 }

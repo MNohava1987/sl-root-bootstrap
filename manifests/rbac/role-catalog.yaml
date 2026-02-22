@@ -1,0 +1,38 @@
+manifest_version: 1
+
+settings:
+  enable_custom_role_profiles: true
+  allow_space_admin_in_custom_profiles: false
+
+role_profile_actions:
+  stack-manager:
+    - SPACE_READ
+    - SPACE_WRITE
+    - RUN_TRIGGER
+    - TASK_CREATE
+    - STACK_CREATE
+    - STACK_UPDATE
+    - STACK_DELETE
+    - STACK_LOCK
+    - STACK_UNLOCK
+    - STACK_ADD_CONFIG
+    - STACK_DELETE_CONFIG
+    - STACK_SET_CURRENT_COMMIT
+    - STACK_SYNC_COMMIT
+    - STACK_UPLOAD_LOCAL_WORKSPACE
+    - STACK_STATE_READ
+  space-manager:
+    - SPACE_READ
+    - SPACE_WRITE
+  policy-manager:
+    - SPACE_READ
+    - SPACE_WRITE
+  readonly-auditor:
+    - SPACE_READ
+
+role_profile_role_slugs:
+  stack-manager: space-admin
+  space-manager: space-admin
+  policy-manager: space-admin
+  readonly-auditor: space-admin
+  space-admin: space-admin

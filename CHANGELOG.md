@@ -2,6 +2,27 @@
 
 All notable changes to the Spacelift Root Bootstrap project will be documented in this file.
 
+## [1.2.0] - 2026-02-22
+### Added
+- Grouped manifest model:
+  - `manifests/topology/management-plane.yaml`
+  - `manifests/bootstrap/bootstrap-config.yaml`
+  - `manifests/governance/naming-catalog.yaml`
+  - `manifests/rbac/role-catalog.yaml`
+- Manifest loader layer in `manifests.tf` with fallback to variables.
+- Dedicated RBAC composition in `rbac.tf` for custom role creation and external role resolution.
+- Naming standard reference document in `docs/naming-standard.md`.
+
+### Changed
+- Runtime naming now follows `<org>-<env>-<domain>-<function>` for spaces, policies, and orchestrator stacks.
+- Documentation updated across architecture, operations, recovery, and assurance guides for grouped manifests and naming standard.
+- Terraform comments rewritten across root and seed files to match docs tone: concise, human language, and explicit risk callouts.
+
+### Fixed
+- Spacelift policy package naming now uses `package spacelift` (provider-required validation behavior).
+- Manifest decode logic now avoids Terraform type mismatch failures when optional manifests are missing.
+- RBAC lookup flow now avoids plan-time read-before-create failures for newly created custom roles.
+
 ### Enhancement Opportunities
 - **API Race Condition**: During full destruction, the Spacelift API may return a success signal for stack deletion while internal references are still clearing. This can cause parent space deletion to fail on the first attempt. 
     - **Future Resolution Strategy**: Implementation of a polling provisioner or CI/CD level retry is recommended to handle the eventually consistent nature of the Spacelift backend without introducing artificial sleeps.

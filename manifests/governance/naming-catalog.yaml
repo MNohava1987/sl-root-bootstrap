@@ -1,0 +1,29 @@
+manifest_version: 1
+
+tokens:
+  org: "sl"
+  domain: "mgmt"
+
+functions:
+  admin_stacks: "admin-stacks-orchestrator"
+  env_root_space: "env-root-space"
+  policy_git_flow: "git-flow"
+  policy_branch_guard: "branch-guard"
+  policy_approval_law: "approval-law"
+  role_prefix: "role"
+
+rules:
+  token_regex: "^[a-z0-9]+(-[a-z0-9]+)*$"
+  max_length: 63
+
+enforcement:
+  enforce_allowed_envs: false
+  enforce_allowed_domains: true
+  enforce_allowed_functions: false
+  enforce_allowed_role_profiles: false
+
+allow_lists:
+  envs: ["live", "prod", "stage", "test", "dev", "sandbox", "matt-test1"]
+  domains: ["mgmt", "network", "security", "identity", "data", "app", "observability", "shared"]
+  functions: ["admin-stacks-orchestrator", "env-root-space", "git-flow", "branch-guard", "approval-law", "role"]
+  role_profiles: ["stack-manager", "space-manager", "policy-manager", "readonly-auditor", "space-admin"]

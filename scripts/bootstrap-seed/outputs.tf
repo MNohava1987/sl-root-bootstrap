@@ -1,5 +1,5 @@
 output "bootstrap_stack_id" {
-  description = "The ID of the foundational sl-root-bootstrap stack."
+  description = "The ID of the foundational Tier-0 bootstrap stack."
   value       = spacelift_stack.bootstrap.id
 }
 

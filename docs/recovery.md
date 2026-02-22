@@ -15,16 +15,16 @@ This document provides definitive, step-by-step instructions for performing a "N
 Safety Note: Destruction is protected by variables to prevent accidental execution.
 
 ### Step 1: Unlock Environment Protection
-1. Open `sl-root-bootstrap/variables.tf`.
+1. Open `variables.tf` in this repository root.
 2. Set `enable_deletion_protection = false`.
 3. Commit and push to `main`.
-4. Trigger a run of the `sl-root-bootstrap` stack in Spacelift and confirm the Apply. This "unlocks" all Tier 1 orchestrator stacks.
+4. Trigger a run of the `sl-root-mgmt-bootstrap` stack in Spacelift and confirm the Apply. This "unlocks" all Tier 1 orchestrator stacks.
 
 ### Step 2: Clear the Management Plane
-1. Open `sl-root-bootstrap/manifests/management-plane.yaml`.
+1. Open `manifests/topology/management-plane.yaml`.
 2. Comment out or remove all entries under the `environments:` key.
 3. Commit and push to `main`.
-4. Trigger a run of the `sl-root-bootstrap` stack. Spacelift will autonomously delete all environment spaces, local policies, and orchestrator stacks.
+4. Trigger a run of the `sl-root-mgmt-bootstrap` stack. Spacelift will autonomously delete all environment spaces, local policies, and orchestrator stacks.
 
 ### Step 3: Unlock and Destroy the Foundation
 1. Navigate to `scripts/bootstrap-seed/variables.tf`.
@@ -45,24 +45,24 @@ Safety Note: Destruction is protected by variables to prevent accidental executi
 Follow the instructions in `scripts/bootstrap-seed/README.md` to run the local seed.
 1. Ensure `enable_deletion_protection = true` in `variables.tf`.
 2. Run `terraform init` and `terraform apply`.
-3. Verification: The `sl-root-bootstrap` stack and root policies will appear in the Spacelift Root space.
+3. Verification: The `sl-root-mgmt-bootstrap` stack and root policies will appear in the Spacelift Root space.
 
 ### Step 2: Restore the Management Plane (Tier 1)
-1. Ensure your environment configurations are active in `manifests/management-plane.yaml`.
-2. Ensure `enable_deletion_protection = true` in `sl-root-bootstrap/variables.tf`.
+1. Ensure your environment configurations are active in `manifests/topology/management-plane.yaml`.
+2. Ensure `enable_deletion_protection = true` in `variables.tf`.
 3. Commit and push your changes to the `main` branch.
-4. Navigate to the `sl-root-bootstrap` stack in the Spacelift UI.
+4. Navigate to the `sl-root-mgmt-bootstrap` stack in the Spacelift UI.
 5. Trigger a **Tracked Run**.
 6. Review the plan and click **Confirm**.
 
 ### Step 3: Final Verification
-1. Confirm the `sl-root-bootstrap` run has status **FINISHED**.
+1. Confirm the `sl-root-mgmt-bootstrap` run has status **FINISHED**.
 2. Verify that environment spaces (e.g., Live) exist.
 3. Verify that environment-specific policies are created inside their respective spaces.
-4. Verify that the orchestrator stacks (e.g., `live-admin-stacks`) are active and carry the correct assurance labels.
+4. Verify that the orchestrator stacks (for example `sl-live-mgmt-admin-stacks-orchestrator`) are active and carry the correct assurance labels.
 
 ---
 
 ## Operational Safety
 Always perform a `local-preview` before Step 2 of the Pave process to ensure the restoration plan is correct without triggering premature changes:
-`spacectl stack local-preview --id sl-root-bootstrap`
+`spacectl stack local-preview --id sl-root-mgmt-bootstrap`
