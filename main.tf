@@ -137,6 +137,26 @@ resource "spacelift_environment_variable" "admin_stacks_context_vars" {
         name     = "TF_VAR_assurance_tier"
         value    = local.envs[env_name].assurance_tier
       }
+      "${env_name}.TF_VAR_naming_org" = {
+        stack_id = stack.id
+        name     = "TF_VAR_naming_org"
+        value    = local.cfg_naming_org
+      }
+      "${env_name}.TF_VAR_naming_domain" = {
+        stack_id = stack.id
+        name     = "TF_VAR_naming_domain"
+        value    = local.cfg_naming_domain
+      }
+      "${env_name}.TF_VAR_naming_function_env_root_space" = {
+        stack_id = stack.id
+        name     = "TF_VAR_naming_function_env_root_space"
+        value    = local.cfg_naming_function_env_root_space
+      }
+      "${env_name}.TF_VAR_admin_sub_space_name" = {
+        stack_id = stack.id
+        name     = "TF_VAR_admin_sub_space_name"
+        value    = "admin"
+      }
     }
   ]...)
 
