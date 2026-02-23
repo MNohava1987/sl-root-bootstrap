@@ -8,11 +8,11 @@ settings:
 
 environments:
   - name: "Live"
-    enabled: true
+    enabled: false
     description: "Primary Production Management Plane"
     assurance_tier: "tier-1"
   - name: "matt-test1"
-    enabled: true
+    enabled: false
     description: "Testing and Validation Management Plane"
     assurance_tier: "tier-10"
 
