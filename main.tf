@@ -81,7 +81,7 @@ resource "spacelift_space" "env_root" {
   for_each        = local.envs
   name            = "${local.cfg_naming_org}-${lower(each.key)}-${local.cfg_naming_domain}-${local.cfg_naming_function_env_root_space}"
   description     = each.value.description
-  parent_space_id = "root"
+  parent_space_id = var.admin_space_id
 
   # HARD ISOLATION. Do not inherit root entities into environment roots.
   inherit_entities = false
